@@ -37,6 +37,8 @@
 - [Ibex RISC-V Core Wrapper](./ip/rv_core_ibex/README.md)
 - [RISC-V Debug Manager](./ip/rv_dm/README.md)
 - [Timer](./ip/rv_timer/README.md)
+  - [User Reference](./ip/rv_timer/doc/user-ref.md)
+  - [Theory of Operations](./ip/rv_timer/doc/theory-of-operations.md)
 - [SPI Device](./ip/spi_device/README.md)
 - [SPI Host](./ip/spi_host/README.md)
 - [SRAM Controller](./ip/sram_ctrl/README.md)
