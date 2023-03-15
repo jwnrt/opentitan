@@ -1,5 +1,9 @@
 [workspace]
 members = [
     "cryptotest",
-    "opentitanlib/opentitantool_derive/",
+    "opentitanlib",
+    "opentitanlib/opentitantool_derive",
+    "opentitantool",
+    "opentitansession",
+    "tpm2_test_server/"
 ]

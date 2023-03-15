@@ -1,0 +1,52 @@
+[package]
+name = "opentitanlib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.69"
+arrayvec = "0.7.2"
+bitflags = "2.0.0"
+bitvec = "1.0.1"
+byteorder = "1.4.3"
+chrono = "0.4.24"
+crc = "3.0.1"
+deser-hjson = "1.1.0"
+directories = "4.0.1"
+env_logger = "0.10.0"
+erased-serde = "0.3.25"
+hex = "0.4.3"
+humantime = "2.1.0"
+humantime-serde = "1.1.1"
+indicatif = "0.17.3"
+lazy_static = "1.4.0"
+log = "0.4.17"
+memoffset = "0.8.0"
+mio = { version = "0.8.6", features = ["os-poll", "net", "os-ext"] }
+mio-signals = "0.2.0"
+nix = "0.26.2"
+num-bigint-dig = "0.8.2"
+num-traits = "0.2.15"
+num_enum = "0.5.11"
+rand = "0.8.5"
+raw_tty = "0.1.0"
+regex = "1.7.1"
+rsa = "0.8.2"
+rusb = "0.9.1"
+safe-ftdi = { git = "https://github.com/lowRISC/safe-ftdi.git", version = "0.3.0" }
+serde = { version = "1.0.156", features = ["serde_derive"] }
+serde_annotate = { git = "https://github.com/lowRISC/serde-annotate.git", version = "0.1.0" }
+serde_json = "1.0.94"
+serialport = "4.2.0"
+sha2 = "0.10.6"
+shellwords = "1.1.0"
+structopt = "0.3.26"
+thiserror = "1.0.39"
+typetag = "0.2.6"
+zerocopy = "0.6.1"
+
+# Local dependencies
+opentitantool_derive = { path = "./opentitantool_derive" }
+
+[build-dependencies]
+bindgen = "0.64.0"

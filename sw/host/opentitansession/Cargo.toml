@@ -1,0 +1,22 @@
+[package]
+name = "opentitansession"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.70"
+directories = "5.0.0"
+env_logger = "0.10.0"
+erased-serde = "0.3.25"
+hex = "0.4.3"
+indicatif = "0.17.3"
+log = "0.4.17"
+nix = "0.26.2"
+opentitanlib = { version = "0.1.0", path = "../opentitanlib" }
+raw_tty = "0.1.0"
+regex = "1.7.3"
+serde = "1.0.159"
+serde_json = "1.0.95"
+shellwords = "1.1.0"
+structopt = "0.3.26"
+thiserror = "1.0.40"

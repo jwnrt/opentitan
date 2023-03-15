@@ -1,0 +1,13 @@
+[package]
+name = "tpm2_test_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.70"
+env_logger = "0.10.0"
+log = "0.4.17"
+mio = "0.8.6"
+num_enum = "0.6.0"
+opentitanlib = { version = "0.1.0", path = "../opentitanlib" }
+structopt = "0.3.26"
