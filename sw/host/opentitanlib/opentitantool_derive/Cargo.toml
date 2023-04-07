@@ -1,0 +1,15 @@
+[package]
+name = "opentitantool_derive"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.52"
+proc-macro-error = "1.0.4"
+quote = "1.0.26"
+serde_annotate = { git = "https://github.com/lowRISC/serde-annotate.git", version = "0.1.0" }
+serde_derive = "1.0.159"
+syn = "2.0.2"
