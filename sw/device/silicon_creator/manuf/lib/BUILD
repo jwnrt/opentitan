@@ -299,7 +299,7 @@ opentitan_functest(
     cw310 = cw310_params(
         bitstream = "//hw/bitstream:rom_otp_test_unlocked0",
         tags = ["jtag"],
-        test_cmds = _MANUF_LC_TRANSITION_TEST_CMDS,
+        test_cmds = _MANUF_LC_TRANSITION_TEST_CMDS_WBOOTSTRAP,
     ),
     data = OPENTITANTOOL_OPENOCD_DATA_DEPS,
     targets = ["cw310_rom"],
