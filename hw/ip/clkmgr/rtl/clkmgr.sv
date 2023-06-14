@@ -17,7 +17,7 @@ module clkmgr import clkmgr_pkg::*; (
   input clk_fixed_i,
   input rst_fixed_ni,
   input clk_usb_48mhz_i,
-  input rst_usb_48mhz_ni,
+	input rst_usb_48mhz_ni,  
 
   // Bus Interface
   input tlul_pkg::tl_h2d_t tl_i,
