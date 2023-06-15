@@ -134,6 +134,10 @@ checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bindgen"
+version = "0.1.0"
+
+[[package]]
+name = "bindgen"
 version = "0.64.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4243e6031260db77ede97ad86c27e501d646a27ab57b59a574f725d98ab1fb4"
@@ -1065,7 +1069,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "arrayvec",
- "bindgen",
+ "bindgen 0.64.0",
  "bitflags 2.1.0",
  "bitvec",
  "byteorder",
