@@ -1,0 +1,1 @@
+bazel_dep(name = "stardoc", version = "0.6.1")
