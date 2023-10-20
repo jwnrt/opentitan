@@ -98,6 +98,8 @@ tar = "0.4.36"
 elf = "0.7.1"
 ring = "0.16.20"
 rsa-der = "0.3.0"
+asn1 = "0.15.5"
+openssl = "0.10.57"
 
 [dev-dependencies]
 indoc = "2.0.4"
