@@ -317,6 +317,15 @@ pub enum VariableType {
     },
 }
 
+impl VariableType {
+    // Return the maximum size of the variable in bytes.
+    pub fn size(&self) -> usize {
+        match self {
+            Self::ByteArray { size } | Self::Integer { size, .. } | Self::String { size } => *size,
+        }
+    }
+}
+
 /// Declaration of a variable that can be filled into the template.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]

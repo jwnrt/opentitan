@@ -11,6 +11,7 @@
 //! format. Details of the certificates will be available in the documentation
 //! in the future.
 
+pub mod codegen;
 pub mod offsets;
 pub mod template;
 pub mod types;

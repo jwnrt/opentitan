@@ -9,6 +9,7 @@ package(default_visibility = ["//visibility:public"])
 rust_library(
     name = "ot_certs",
     srcs = [
+        "src/codegen.rs",
         "src/lib.rs",
         "src/offsets.rs",
         "src/template/hjson.rs",
@@ -38,9 +39,6 @@ rust_library(
 rust_test(
     name = "ot_certs_test",
     crate = ":ot_certs",
-    proc_macro_deps = [
-        "@crate_index//:indoc",
-    ],
 )
 
 rust_doc(
