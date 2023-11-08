@@ -349,6 +349,7 @@ _NORMAL_DEPENDENCIES = {
             "serde": "@crate_index__serde-1.0.189//:serde",
             "serde_bytes": "@crate_index__serde_bytes-0.11.12//:serde_bytes",
             "serde_json": "@crate_index__serde_json-1.0.107//:serde_json",
+            "serde_with": "@crate_index__serde_with-3.4.0//:serde_with",
             "serialport": "@crate_index__serialport-4.2.2//:serialport",
             "sha2": "@crate_index__sha2-0.10.7//:sha2",
             "shellwords": "@crate_index__shellwords-1.1.0//:shellwords",
@@ -390,11 +391,16 @@ _PROC_MACRO_DEPENDENCIES = {
 
 _PROC_MACRO_ALIASES = {
     "third_party/rust": {
+        _COMMON_CONDITION: {
+        },
     },
 }
 
 _PROC_MACRO_DEV_DEPENDENCIES = {
     "third_party/rust": {
+        _COMMON_CONDITION: {
+            "indoc": "@crate_index__indoc-2.0.4//:indoc",
+        },
     },
 }
 
@@ -1014,6 +1020,36 @@ def crate_repositories():
 
     maybe(
         http_archive,
+        name = "crate_index__darling-0.20.3",
+        sha256 = "0209d94da627ab5605dcccf08bb18afa5009cfbef48d8a8b7d7bdbc79be25c5e",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/darling/0.20.3/download"],
+        strip_prefix = "darling-0.20.3",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.darling-0.20.3.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__darling_core-0.20.3",
+        sha256 = "177e3443818124b357d8e76f53be906d60937f0d3a90773a664fa63fa253e621",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/darling_core/0.20.3/download"],
+        strip_prefix = "darling_core-0.20.3",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.darling_core-0.20.3.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__darling_macro-0.20.3",
+        sha256 = "836a9bbc7ad63342d6d6e7b815ccab164bc77a2d95d84bc3117a8c0d5c98e2d5",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/darling_macro/0.20.3/download"],
+        strip_prefix = "darling_macro-0.20.3",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.darling_macro-0.20.3.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "crate_index__data-encoding-2.4.0",
         sha256 = "c2e66c9d817f1720209181c316d28635c050fa304f9c79e47a520882661b7308",
         type = "tar.gz",
@@ -1614,6 +1650,16 @@ def crate_repositories():
 
     maybe(
         http_archive,
+        name = "crate_index__ident_case-1.0.1",
+        sha256 = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/ident_case/1.0.1/download"],
+        strip_prefix = "ident_case-1.0.1",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.ident_case-1.0.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "crate_index__idna-0.4.0",
         sha256 = "7d20d6b07bfbc108882d88ed8e37d39636dcc260e15e30c45e6ba089610b917c",
         type = "tar.gz",
@@ -1660,6 +1706,16 @@ def crate_repositories():
         urls = ["https://crates.io/api/v1/crates/indicatif/0.17.6/download"],
         strip_prefix = "indicatif-0.17.6",
         build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.indicatif-0.17.6.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__indoc-2.0.4",
+        sha256 = "1e186cfbae8084e513daff4240b4797e342f988cecda4fb6c939150f96315fd8",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/indoc/2.0.4/download"],
+        strip_prefix = "indoc-2.0.4",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.indoc-2.0.4.bazel"),
     )
 
     maybe(
@@ -2898,6 +2954,26 @@ def crate_repositories():
         urls = ["https://crates.io/api/v1/crates/serde_urlencoded/0.7.1/download"],
         strip_prefix = "serde_urlencoded-0.7.1",
         build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.serde_urlencoded-0.7.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__serde_with-3.4.0",
+        sha256 = "64cd236ccc1b7a29e7e2739f27c0b2dd199804abc4290e32f59f3b68d6405c23",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/serde_with/3.4.0/download"],
+        strip_prefix = "serde_with-3.4.0",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.serde_with-3.4.0.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__serde_with_macros-3.4.0",
+        sha256 = "93634eb5f75a2323b16de4748022ac4297f9e76b6dced2be287a099f41b5e788",
+        type = "tar.gz",
+        urls = ["https://crates.io/api/v1/crates/serde_with_macros/3.4.0/download"],
+        strip_prefix = "serde_with_macros-3.4.0",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.serde_with_macros-3.4.0.bazel"),
     )
 
     maybe(

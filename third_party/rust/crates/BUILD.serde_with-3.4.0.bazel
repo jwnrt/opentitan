@@ -6,18 +6,23 @@
 #     bazel run @//third_party/rust:crate_index
 ###############################################################################
 
-load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 # licenses([
-#     "TODO",  # Apache-2.0 OR MIT
+#     "TODO",  # MIT OR Apache-2.0
 # ])
 
 rust_library(
-    name = "indexmap",
+    name = "serde_with",
     srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@crate_index__chrono-0.4.31//:chrono": "chrono_0_4",
+        "@crate_index__indexmap-1.9.3//:indexmap": "indexmap_1",
+        "@crate_index__indexmap-2.0.0//:indexmap": "indexmap_2",
+        "@crate_index__time-0.3.28//:time": "time_0_3",
+    },
     compile_data = glob(
         include = ["**"],
         exclude = [
@@ -30,14 +35,20 @@ rust_library(
         ],
     ),
     crate_features = [
+        "alloc",
+        "default",
+        "macros",
         "std",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
+    proc_macro_deps = [
+        "@crate_index__serde_with_macros-3.4.0//:serde_with_macros",
+    ],
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
-        "crate-name=indexmap",
+        "crate-name=serde_with",
         "manual",
         "noclippy",
         "norustfmt",
@@ -76,53 +87,12 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.9.3",
+    version = "3.4.0",
     deps = [
-        "@crate_index__hashbrown-0.12.3//:hashbrown",
-        "@crate_index__indexmap-1.9.3//:build_script_build",
+        "@crate_index__chrono-0.4.31//:chrono",
+        "@crate_index__indexmap-1.9.3//:indexmap",
+        "@crate_index__indexmap-2.0.0//:indexmap",
         "@crate_index__serde-1.0.189//:serde",
+        "@crate_index__time-0.3.28//:time",
     ],
-)
-
-cargo_build_script(
-    name = "indexmap_build_script",
-    srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "std",
-    ],
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
-        include = ["**"],
-        exclude = [
-            "**/* *",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    edition = "2021",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-bazel",
-        "crate-name=indexmap",
-        "manual",
-        "noclippy",
-        "norustfmt",
-    ],
-    version = "1.9.3",
-    visibility = ["//visibility:private"],
-    deps = [
-        "@crate_index__autocfg-1.1.0//:autocfg",
-    ],
-)
-
-alias(
-    name = "build_script_build",
-    actual = "indexmap_build_script",
-    tags = ["manual"],
 )
