@@ -254,6 +254,7 @@ opentitan_test(
         tags = [
             "lc_dev",
             "manuf",
+            "flaky",
         ],
         test_cmd = """
             --bootstrap={firmware}
