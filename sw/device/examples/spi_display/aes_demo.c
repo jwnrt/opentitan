@@ -41,7 +41,7 @@ status_t run_aes(context_t *app, dif_aes_mode_t mode) {
   
   lcd_st7735_clean(app->lcd);
   LCD_rectangle rectangle = {
-      .origin = {.x = (160 - 105) / 2, .y = 0}, .width = 82, .height = 76};
+      .origin = {.x = 0, .y = 0}, .width = 82, .height = 76};
 
   lcd_st7735_draw_rgb565(app->lcd, rectangle, (uint8_t *)ibex_image_82_76);
   
@@ -51,7 +51,7 @@ status_t run_aes(context_t *app, dif_aes_mode_t mode) {
   screen_println(app->lcd, " We'll encrypt the", alined_center, 7);
   screen_println(app->lcd, " image above with ", alined_center, 8);
   screen_println(app->lcd, string, alined_center, 9);
-  busy_spin_micros(5000 * 1000);
+  busy_spin_micros(6000 * 1000);
 
   uint8_t key_share0[sizeof(kAesModesKey128)];
   for (int i = 0; i < sizeof(kAesModesKey128); ++i) {
@@ -73,6 +73,7 @@ status_t run_aes(context_t *app, dif_aes_mode_t mode) {
       .reseed_on_key_change = false,
       .ctrl_aux_lock = false,
   };
+  rectangle.origin.x = rectangle.width - 2;
   lcd_st7735_rgb565_start(app->lcd, rectangle);
 
   uint8_t *plain_text = (uint8_t *)ibex_image_82_76;
