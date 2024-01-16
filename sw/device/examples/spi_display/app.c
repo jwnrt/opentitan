@@ -44,7 +44,7 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
   lcd_st7735_init(&lcd, &interface);
 
   // Set the LCD orientation.
-  lcd_st7735_set_orientation(&lcd, LCD_Rotate180);
+  lcd_st7735_set_orientation(&lcd, LCD_Rotate0);
 
   // Setup text font bitmaps to be used and the colors.
   lcd_st7735_set_font(&lcd, &lucidaConsole_10ptFont);

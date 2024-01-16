@@ -21,91 +21,73 @@
 
 OTTF_DEFINE_TEST_CONFIG();
 
-status_t spi_host1_pinmux_select_cw340(const dif_pinmux_t *pinmux) {
-  LOG_INFO("%s", __func__);
+typedef struct Pinmap {
+  top_earlgrey_pinmux_mio_out_t csb;
+  top_earlgrey_pinmux_mio_out_t sd0;
+  top_earlgrey_pinmux_mio_out_t clk;
+  top_earlgrey_pinmux_mio_out_t reset;
+  top_earlgrey_pinmux_mio_out_t dc;
+  top_earlgrey_pinmux_mio_out_t led;
+  size_t spi_speed;
+} Pinmap_t;
+
+static const Pinmap_t kCw340Pinmap = {
+    .csb = kTopEarlgreyPinmuxMioOutIob6,
+    .sd0 = kTopEarlgreyPinmuxMioOutIob0,
+    .clk = kTopEarlgreyPinmuxMioOutIob1,
+    .reset = kTopEarlgreyPinmuxMioOutIob4,
+    .dc = kTopEarlgreyPinmuxMioOutIob2,
+    .led = kTopEarlgreyPinmuxMioOutIob3,
+    .spi_speed = 1000000, // 1Mhz
+};
+
+static const Pinmap_t kSiliconPinmap = {
+    .csb = kTopEarlgreyPinmuxMioOutIob1,
+    .sd0 = kTopEarlgreyPinmuxMioOutIob7,
+    .clk = kTopEarlgreyPinmuxMioOutIob9,
+    .reset = kTopEarlgreyPinmuxMioOutIob3,
+    .dc = kTopEarlgreyPinmuxMioOutIob5,
+    .led = kTopEarlgreyPinmuxMioOutIob11,
+    .spi_speed = 10000000, //10Mhz
+};
+
+static status_t pinmux_select(const dif_pinmux_t *pinmux, Pinmap_t pinmap) {
   // CSB.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob6,  // J18B - HD_IOB6
+  TRY(dif_pinmux_output_select(pinmux, pinmap.csb,
                                kTopEarlgreyPinmuxOutselSpiHost1Csb));
 
-  // SD0/SDA/MOSI.
-  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd0,
-                              kTopEarlgreyPinmuxInselIob0));  // J18B - HD_IOB0
-  TRY(dif_pinmux_output_select(
-      pinmux, kTopEarlgreyPinmuxMioOutIob0,
-      kTopEarlgreyPinmuxOutselSpiHost1Sd0));  // J18B - HD_IOB0
-
+  TRY(dif_pinmux_output_select(pinmux, pinmap.sd0,
+                               kTopEarlgreyPinmuxOutselSpiHost1Sd0));
   // SCLK.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob1,  // J18B  - HD_IOB1
+  TRY(dif_pinmux_output_select(pinmux, pinmap.clk,
                                kTopEarlgreyPinmuxOutselSpiHost1Sck));
-  return OK_STATUS();
-}
-
-status_t gpio_pinmux_select_cw340(const dif_pinmux_t *pinmux) {
-  LOG_INFO("%s", __func__);
 
   // RESET.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob4,  // J18B - HD_IOB4
+  TRY(dif_pinmux_output_select(pinmux, pinmap.reset,
                                kTopEarlgreyPinmuxOutselGpioGpio0));
   // A0/DC.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob2,  // J18B - HD_IOB2
+  TRY(dif_pinmux_output_select(pinmux, pinmap.dc,
                                kTopEarlgreyPinmuxOutselGpioGpio1));
   // LED.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob3,  // J18B - HD_IOB3
-                               kTopEarlgreyPinmuxOutselGpioGpio2));
-  // // CSB.
-  // TRY(dif_pinmux_output_select(
-  //     pinmux, kTopEarlgreyPinmuxMioOutIob6,  // J18B - HD_IOB6
-  //     kTopEarlgreyPinmuxOutselGpioGpio3));
-  return OK_STATUS();
-}
-
-
-
-status_t spi_host1_pinmux_select_chip(const dif_pinmux_t *pinmux) {
-  LOG_INFO("%s", __func__);
-  // CSB.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob1,  
-                               kTopEarlgreyPinmuxOutselSpiHost1Csb));
-
-  // SD0/SDA/MOSI.
-  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd0,
-                              kTopEarlgreyPinmuxInselIob7)); 
-  TRY(dif_pinmux_output_select(
-      pinmux, kTopEarlgreyPinmuxMioOutIob7,
-      kTopEarlgreyPinmuxOutselSpiHost1Sd0));
-  // SCLK.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob9, 
-                               kTopEarlgreyPinmuxOutselSpiHost1Sck));
-  return OK_STATUS();
-}
-
-status_t gpio_pinmux_select_chip(const dif_pinmux_t *pinmux) {
-  LOG_INFO("%s", __func__);
-
-  // RESET.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob3, 
-                               kTopEarlgreyPinmuxOutselGpioGpio0));
-  // A0/DC.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob5, 
-                               kTopEarlgreyPinmuxOutselGpioGpio1));
-  // LED.
-  TRY(dif_pinmux_output_select(pinmux,
-                               kTopEarlgreyPinmuxMioOutIob11, 
+  TRY(dif_pinmux_output_select(pinmux, pinmap.led,
                                kTopEarlgreyPinmuxOutselGpioGpio2));
   return OK_STATUS();
 }
 
 bool test_main(void) {
   dif_spi_host_t spi_host;
+    const Pinmap_t *config = NULL;
+  switch (kDeviceType) {
+    case kDeviceFpgaCw340:
+      config = &kCw340Pinmap;
+      break;
+    case kDeviceSilicon:
+      config = &kSiliconPinmap;
+      break;
+    default:
+      LOG_ERROR("Platform not supported");
+  }
+
   CHECK_DIF_OK(dif_spi_host_init(
       mmio_region_from_addr(TOP_EARLGREY_SPI_HOST1_BASE_ADDR), &spi_host));
 
@@ -114,7 +96,7 @@ bool test_main(void) {
 
   CHECK_DIF_OK(dif_spi_host_configure(&spi_host,
                                       (dif_spi_host_config_t){
-                                          .spi_clock = 10000000,
+                                          .spi_clock = config->spi_speed,
                                           .peripheral_clock_freq_hz =
                                               (uint32_t)kClockFreqPeripheralHz,
                                       }),
@@ -130,9 +112,8 @@ bool test_main(void) {
   CHECK_DIF_OK(dif_pinmux_init(
       mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
 
-  spi_host1_pinmux_select_chip(&pinmux);
 
-  gpio_pinmux_select_chip(&pinmux);
+  pinmux_select(&pinmux, *config);
 
   dif_aes_t aes;
   // Initialise AES.

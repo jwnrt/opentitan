@@ -15,7 +15,7 @@ opentitan_test(
         "screen.c",
         "screen.h",
         "lowrisc_logo.h",
-        "ibex_logo.h",
+        "ot_shape_80x80.h",
         "app.c",
         "app.h",
         "aes_demo.c",

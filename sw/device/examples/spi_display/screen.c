@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "screen.h"
-#include "sw/device/lib/runtime/ibex.h"
+
 #include "display_drivers/st7735/lcd_st7735.h"
 #include "string.h"
-
+#include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/runtime/print.h"
 
 void screen_show_menu(St7735Context *lcd, Menu_t *menu, size_t selected) {
@@ -61,7 +61,7 @@ void screen_println(St7735Context *lcd, const char *str,
   if (alignment != alined_left) {
     // Align the text in the right.
     size_t str_width = strlen(str) * lcd->parent.font->descriptor_table->width;
-    if (str_width < lcd->parent.width){
+    if (str_width < lcd->parent.width) {
       pos.x = lcd->parent.width - str_width;
     }
     if (alignment == alined_center) {
@@ -74,13 +74,14 @@ void screen_println(St7735Context *lcd, const char *str,
   lcd_st7735_puts(lcd, pos, str);
 }
 
-void screen_profile_print(St7735Context *lcd, uint32_t cycles){
+void screen_profile_print(St7735Context *lcd, uint32_t cycles) {
   uint32_t clock_mhz = (uint32_t)kClockFreqCpuHz / 1000000;
   uint32_t time_micros = cycles / clock_mhz;
   char string[64] = {0};
-  base_snprintf(string, sizeof(string), "Took %uK cycles    ", cycles/1000);
+  base_snprintf(string, sizeof(string), "Took %uK cycles    ", cycles / 1000);
   screen_println(lcd, string, alined_center, 8);
-  base_snprintf(string, sizeof(string), "%ums @ %u MHz     ", time_micros / 1000, clock_mhz);
+  base_snprintf(string, sizeof(string), "%ums @ %u MHz     ",
+                time_micros / 1000, clock_mhz);
   screen_println(lcd, string, alined_center, 9);
 }
 
