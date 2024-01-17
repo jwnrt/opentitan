@@ -7,7 +7,8 @@
 #include "context.h"
 #include "demos.h"
 #include "lowrisc_logo.h"
-#include "ot_shape_80x80.h"
+#include "Tux_80x95.h"
+// #include "ot_shape_80x80.h"
 #include "screen.h"
 #include "sw/device/lib/runtime/print.h"
 #include "sw/device/lib/testing/aes_testutils.h"
@@ -37,22 +38,30 @@ const char *aes_mode_to_string(dif_aes_mode_t mode) {
 }
 
 status_t run_aes(context_t *app, dif_aes_mode_t mode) {
-  uint8_t *plain_image = (uint8_t *)ot_shape_80_80;
-  int image_len = sizeof(ot_shape_80_80);
+  LCD_rectangle rectangle = {
+      .origin = {.x = 0, .y = 0}, .width = 80, .height = 95};
+  uint8_t *plain_image = (uint8_t *)tmux_80_95;
+  int image_len = sizeof(tmux_80_95);
+  // uint8_t *plain_image = (uint8_t *)ot_shape_80_80;
+  // int image_len = sizeof(ot_shape_80_80);
 
   lcd_st7735_clean(app->lcd);
-  LCD_rectangle rectangle = {
-      .origin = {.x = 0, .y = 0}, .width = 80, .height = 80};
-
   lcd_st7735_draw_rgb565(app->lcd, rectangle, plain_image);
 
   char string[64] = {0};
-  base_snprintf(string, sizeof(string), "AES %s    ", aes_mode_to_string(mode));
+  base_snprintf(string, sizeof(string), "AES %s", aes_mode_to_string(mode));
 
-  screen_println(app->lcd, " We'll encrypt the", alined_center, 7);
-  screen_println(app->lcd, " image above with ", alined_center, 8);
-  screen_println(app->lcd, string, alined_center, 9);
-  busy_spin_micros(5000 * 1000);
+  screen_println(app->lcd, " Will encrypt the", alined_center, 7, true);
+  screen_println(app->lcd, " image above with ", alined_center, 8, true);
+  screen_println(app->lcd, string, alined_center, 9, true);
+
+  for (size_t i = 5; i > 0; i--) {
+    size_t len = base_snprintf(string, sizeof(string), " %u     ", i);
+    string[len] = 0;
+    screen_println(app->lcd, string, alined_right, 3, false);
+    busy_spin_micros(1000 * 1000);
+  }
+  screen_println(app->lcd, " 0     ", alined_right, 3, false);
 
   uint8_t key_share0[sizeof(kAesModesKey128)];
   for (int i = 0; i < sizeof(kAesModesKey128); ++i) {
@@ -100,19 +109,24 @@ status_t run_aes(context_t *app, dif_aes_mode_t mode) {
     lcd_st7735_rgb565_put(app->lcd, (uint8_t *)&out_data.data,
                           sizeof(out_data.data));
   } while (image_len > 0);
+
   lcd_st7735_rgb565_finish(app->lcd);
   TRY(dif_aes_end(app->aes));
 
   uint32_t cycles = profile_end(profile);
   uint32_t clock_mhz = (uint32_t)kClockFreqCpuHz / 1000000;
   uint32_t time_micros = cycles / clock_mhz;
-  screen_println(app->lcd, "                       ", alined_center, 7);
-  base_snprintf(string, sizeof(string), "Took %uK cycles    ", cycles / 1000);
-  screen_println(app->lcd, string, alined_center, 8);
+
+  screen_println(app->lcd, "Encrypted in", alined_center, 7, true);
+  size_t len = base_snprintf(string, sizeof(string), "~%u Mi CPU cycles",
+                             cycles / 1000000);
+  string[len] = 0;
+  screen_println(app->lcd, string, alined_center, 8, true);
   LOG_INFO("%s", string);
-  base_snprintf(string, sizeof(string), "%ums @ %u MHz     ",
-                time_micros / 1000, clock_mhz);
-  screen_println(app->lcd, string, alined_center, 9);
+  len = base_snprintf(string, sizeof(string), "or %u ms @ %u MHz",
+                      time_micros / 1000, clock_mhz);
+  string[len] = 0;
+  screen_println(app->lcd, string, alined_center, 9, true);
 
   return OK_STATUS();
 }

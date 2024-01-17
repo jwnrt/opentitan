@@ -20,12 +20,12 @@ void screen_show_menu(St7735Context *lcd, Menu_t *menu, size_t selected) {
 
   // Invert background and foreground colors for the title.
   lcd_st7735_set_font_colors(lcd, menu->color, menu->background);
-  screen_println(lcd, menu->title, alined_center, line++);
+  screen_println(lcd, menu->title, alined_center, line++, false);
   // Set the colors for the menu items.
   lcd_st7735_set_font_colors(lcd, menu->background, menu->color);
   // Draw the menu items.
   for (int i = 0; i < menu->items_count; ++i) {
-    screen_println(lcd, menu->items[i], alined_left, line++);
+    screen_println(lcd, menu->items[i], alined_left, line++, false);
   }
 
   // Drow a boarder around the selected item.
@@ -54,7 +54,7 @@ void screen_show_menu(St7735Context *lcd, Menu_t *menu, size_t selected) {
 }
 
 void screen_println(St7735Context *lcd, const char *str,
-                    TextAlignment_t alignment, size_t line) {
+                    TextAlignment_t alignment, size_t line, bool clean) {
   // Align the test in the left.
   LCD_Point pos = {.y = line * lcd->parent.font->height, .x = 0};
 
@@ -70,6 +70,15 @@ void screen_println(St7735Context *lcd, const char *str,
     }
   }
 
+  if (clean) {
+    // Clean the screen.
+    lcd_st7735_fill_rectangle(
+        lcd,
+        (LCD_rectangle){.origin = {.x = 0, .y = pos.y},
+                        .width = lcd->parent.width,
+                        .height = lcd->parent.font->height},
+        0xffffff);
+  }
   // Draw the text.
   lcd_st7735_puts(lcd, pos, str);
 }
@@ -78,11 +87,11 @@ void screen_profile_print(St7735Context *lcd, uint32_t cycles) {
   uint32_t clock_mhz = (uint32_t)kClockFreqCpuHz / 1000000;
   uint32_t time_micros = cycles / clock_mhz;
   char string[64] = {0};
-  base_snprintf(string, sizeof(string), "Took %uK cycles    ", cycles / 1000);
-  screen_println(lcd, string, alined_center, 8);
-  base_snprintf(string, sizeof(string), "%ums @ %u MHz     ",
-                time_micros / 1000, clock_mhz);
-  screen_println(lcd, string, alined_center, 9);
+  base_snprintf(string, sizeof(string), "Took %uK cycles", cycles / 1000);
+  screen_println(lcd, string, alined_center, 8, true);
+  base_snprintf(string, sizeof(string), "%ums @ %u MHz", time_micros / 1000,
+                clock_mhz);
+  screen_println(lcd, string, alined_center, 9, true);
 }
 
 size_t strlen(const char *str) {

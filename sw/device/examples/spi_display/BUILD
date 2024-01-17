@@ -6,6 +6,12 @@ load(
     "//rules/opentitan:defs.bzl",
     "opentitan_test",
 )
+load(
+    "//rules:opentitan_test.bzl",
+    "cw340_params",
+    "opentitan_functest",
+)
+
 package(default_visibility = ["//visibility:public"])
 
 opentitan_test(
@@ -16,6 +22,7 @@ opentitan_test(
         "screen.h",
         "lowrisc_logo.h",
         "ot_shape_80x80.h",
+        "Tux_80x95.h",
         "app.c",
         "app.h",
         "aes_demo.c",
@@ -40,6 +47,40 @@ opentitan_test(
         "//sw/device/lib/base:mmio",
     ],
 )
+
+opentitan_functest(
+    name = "spi_display_fpga",
+    srcs = [
+        "main.c",
+        "screen.c",
+        "screen.h",
+        "lowrisc_logo.h",
+        "ot_shape_80x80.h",
+        "Tux_80x95.h",
+        "app.c",
+        "app.h",
+        "aes_demo.c",
+        "demos.h",
+        "context.h",
+        "ot_logo_160x85.h",
+    ],
+    copts = [
+        "-nostdlib",
+        "-ffreestanding",
+        # Disable the date-time warning only for the hello world program.
+        "-Wno-date-time",
+    ],  
+    manifest = "//sw/device/silicon_creator/rom_ext:manifest_standard",
+    targets = [
+        "cw340_test_rom",
+    ],
+    deps = [
+        ":spi_display_lib",
+        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
+        "//sw/device/lib/base:mmio",
+    ],
+)
+
 
 cc_library(
     name = "spi_display_lib",

@@ -55,12 +55,12 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
   lcd_st7735_clean(&lcd);
 
   LOG_INFO("%s: Lowrisc logo...", __func__);
+  screen_println(&lcd, "Booting...", alined_center, 7, true);
   // Draw the splash screen with a RGB 565 bitmap and text in the bottom.
   lcd_st7735_draw_rgb565(
       &lcd,
       (LCD_rectangle){.origin = {.x = 0, .y = 5}, .width = 160, .height = 84},
       (uint8_t *)image_160_84);
-  screen_println(&lcd, "Booting...", alined_center, 7);
   timer_delay(1000);
   size_t selected = 0;
 

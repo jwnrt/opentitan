@@ -21,7 +21,7 @@
 
 OTTF_DEFINE_TEST_CONFIG();
 
-typedef struct Pinmap {
+typedef struct Platform {
   top_earlgrey_pinmux_mio_out_t csb;
   top_earlgrey_pinmux_mio_out_t sd0;
   top_earlgrey_pinmux_mio_out_t clk;
@@ -29,29 +29,29 @@ typedef struct Pinmap {
   top_earlgrey_pinmux_mio_out_t dc;
   top_earlgrey_pinmux_mio_out_t led;
   size_t spi_speed;
-} Pinmap_t;
+} Platform_t;
 
-static const Pinmap_t kCw340Pinmap = {
+static const Platform_t kCw340Platform = {
     .csb = kTopEarlgreyPinmuxMioOutIob6,
     .sd0 = kTopEarlgreyPinmuxMioOutIob0,
     .clk = kTopEarlgreyPinmuxMioOutIob1,
     .reset = kTopEarlgreyPinmuxMioOutIob4,
     .dc = kTopEarlgreyPinmuxMioOutIob2,
     .led = kTopEarlgreyPinmuxMioOutIob3,
-    .spi_speed = 1000000, // 1Mhz
+    .spi_speed = 3000000,  // 3Mhz
 };
 
-static const Pinmap_t kSiliconPinmap = {
+static const Platform_t kSiliconPlatform = {
     .csb = kTopEarlgreyPinmuxMioOutIob1,
     .sd0 = kTopEarlgreyPinmuxMioOutIob7,
     .clk = kTopEarlgreyPinmuxMioOutIob9,
     .reset = kTopEarlgreyPinmuxMioOutIob3,
     .dc = kTopEarlgreyPinmuxMioOutIob5,
     .led = kTopEarlgreyPinmuxMioOutIob11,
-    .spi_speed = 10000000, //10Mhz
+    .spi_speed = 12000000,  // 12Mhz
 };
 
-static status_t pinmux_select(const dif_pinmux_t *pinmux, Pinmap_t pinmap) {
+static status_t pinmux_select(const dif_pinmux_t *pinmux, Platform_t pinmap) {
   // CSB.
   TRY(dif_pinmux_output_select(pinmux, pinmap.csb,
                                kTopEarlgreyPinmuxOutselSpiHost1Csb));
@@ -76,16 +76,16 @@ static status_t pinmux_select(const dif_pinmux_t *pinmux, Pinmap_t pinmap) {
 
 bool test_main(void) {
   dif_spi_host_t spi_host;
-    const Pinmap_t *config = NULL;
+  const Platform_t *config = NULL;
   switch (kDeviceType) {
     case kDeviceFpgaCw340:
-      config = &kCw340Pinmap;
+      config = &kCw340Platform;
       break;
     case kDeviceSilicon:
-      config = &kSiliconPinmap;
+      config = &kSiliconPlatform;
       break;
     default:
-      LOG_ERROR("Platform not supported");
+      CHECK(false, "Platform not supported");
   }
 
   CHECK_DIF_OK(dif_spi_host_init(
@@ -111,7 +111,6 @@ bool test_main(void) {
   dif_pinmux_t pinmux;
   CHECK_DIF_OK(dif_pinmux_init(
       mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
-
 
   pinmux_select(&pinmux, *config);
 

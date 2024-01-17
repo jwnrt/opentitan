@@ -32,9 +32,10 @@ typedef enum TextAlignment {
  * @param alignment Text horizontal alignment in the screen.
  * @param line Position line starting at 0. The total number of lines will vary
  * depending on the font size.
+ * @param clear Whether the line should be cleaned before writing.
  */
 void screen_println(St7735Context *lcd, const char *str,
-                    TextAlignment_t alignment, size_t line);
+                    TextAlignment_t alignment, size_t line, bool clear);
 
 typedef struct Menu {
   const char
