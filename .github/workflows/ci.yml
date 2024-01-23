@@ -1,0 +1,76 @@
+# Copyright lowRISC contributors (OpenTitan project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  VERILATOR_VERSION: "4.210"
+  VERIBLE_VERSION: "v0.0-3622-g07b310a3"
+
+jobs:
+  lint:
+    if: "${{ github.event_name == 'pull_request' }}"
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
+    - run: ci/install-package-dependencies.sh
+    - run: ci/scripts/show-env.sh
+
+    - run: ci/scripts/check-ascii.sh
+    - run: ci/scripts/check-cmdgen.sh
+    - run: ci/scripts/check-links.sh
+    - run: ci/scripts/check-no-bazelrc-site.sh
+    - run: ci/scripts/mypy.sh
+    - run: ci/scripts/exec-check.sh
+    - run: ci/scripts/check-licence-headers.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/scripts/clang-format.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/scripts/include-guard.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/scripts/lint-commits.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/scripts/python-lint.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/scripts/rust-format.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/scripts/whitespace.sh ${{ github.event.pull_request.base.sha }}
+    - run: ci/bazelisk.sh test //quality:shellcheck_check
+
+  slow-lint:
+    runs-on: ubuntu-20.04
+    needs: lint
+
+    env:
+      OT_DESTRUCTIVE: 1
+    steps:
+    - uses: actions/checkout@v4
+    - run: ci/install-package-dependencies.sh
+    - run: ci/scripts/show-env.sh
+    - run: ci/scripts/build-docs.sh
+    - run: ci/scripts/check_bazel_test_suites.py
+    - run: ci/scripts/check-bazel-tags.sh
+    - run: ci/scripts/check-bazel-banned-rules.sh
+    - run: ci/scripts/check_bazel_target_names.py
+    - run: ci/scripts/check-generated.sh
+    - run: ci/scripts/check-vendoring.sh
+    - run: ci/bazelisk.sh test //quality:buildifier_check --test_output=streamed
+    - run: |
+        ci/scripts/verible-lint.sh rtl
+        ci/scripts/verible-lint.sh dv
+        ci/scripts/verible-lint.sh fpv
+      if: "${{ github.event_name == 'pull_request' }}"
+
+  airgapped-build:
+    if: "${{ github.event_name == 'pull_request' }}"
+    runs-on: ubuntu-20.04
+    needs: lint
+
+    steps:
+    - uses: actions/checkout@v4
+    - run: ci/install-package-dependencies.sh
+    - run: ci/scripts/test-airgapped-build.sh
