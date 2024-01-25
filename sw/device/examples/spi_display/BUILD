@@ -18,17 +18,6 @@ opentitan_test(
     name = "spi_display",
     srcs = [
         "main.c",
-        "screen.c",
-        "screen.h",
-        "lowrisc_logo.h",
-        "ot_shape_80x80.h",
-        "Tux_80x95.h",
-        "app.c",
-        "app.h",
-        "aes_demo.c",
-        "demos.h",
-        "context.h",
-        "ot_logo_160x85.h",
     ],
     copts = [
         "-nostdlib",
@@ -42,8 +31,7 @@ opentitan_test(
         # "//hw/top_earlgrey:silicon_owner_prodc_rom_ext": None,
     },
     deps = [
-        ":spi_display_lib",
-        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
+        ":spi_display_app",
         "//sw/device/lib/base:mmio",
     ],
 )
@@ -52,17 +40,7 @@ opentitan_functest(
     name = "spi_display_fpga",
     srcs = [
         "main.c",
-        "screen.c",
-        "screen.h",
-        "lowrisc_logo.h",
-        "ot_shape_80x80.h",
-        "Tux_80x95.h",
-        "app.c",
-        "app.h",
-        "aes_demo.c",
-        "demos.h",
-        "context.h",
-        "ot_logo_160x85.h",
+        
     ],
     copts = [
         "-nostdlib",
@@ -75,12 +53,34 @@ opentitan_functest(
         "cw340_test_rom",
     ],
     deps = [
-        ":spi_display_lib",
-        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
+        ":spi_display_app",
         "//sw/device/lib/base:mmio",
     ],
 )
 
+cc_library(
+    name = "spi_display_app",
+    srcs = [
+        "app.c",
+        "screen.c",
+        "aes_demo.c",
+    ],
+    hdrs = [
+        "app.h",
+        "demos.h",
+        "context.h",
+        "screen.h",
+    ],
+    deps = [
+        ":spi_display_lib",
+        "//sw/device/examples/spi_display/images:logo_ibex",
+        "//sw/device/examples/spi_display/images:logo_opentitan_160_39px",
+        "//sw/device/examples/spi_display/images:shape_opentitan_80_80px",
+        "//sw/device/examples/spi_display/images:logo_lowrisc_05_80px",
+        "//sw/device/examples/spi_display/images:logo_tux_80_95px",
+        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
+    ],
+)
 
 cc_library(
     name = "spi_display_lib",

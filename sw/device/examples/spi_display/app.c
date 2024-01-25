@@ -7,7 +7,7 @@
 #include "demos.h"
 #include "display_drivers/core/lucida_console_10pt.h"
 #include "display_drivers/st7735/lcd_st7735.h"
-#include "ot_logo_160x85.h"
+#include "images/logo_opentitan_160_39.h"
 #include "screen.h"
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/testing/test_framework/check.h"
@@ -54,16 +54,18 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
   // Clean display with a white rectangle.
   lcd_st7735_clean(&lcd);
 
-  LOG_INFO("%s: Lowrisc logo...", __func__);
-  screen_println(&lcd, "Booting...", alined_center, 7, true);
+  LOG_INFO("%s: Ot logo...", __func__);
+  screen_println(&lcd, "Opentitan", alined_center, 7, true);
+  screen_println(&lcd, "Boot successful!", alined_center, 8, true);
+  timer_delay(1500);
   // Draw the splash screen with a RGB 565 bitmap and text in the bottom.
   lcd_st7735_draw_rgb565(
       &lcd,
-      (LCD_rectangle){.origin = {.x = 0, .y = 5}, .width = 160, .height = 84},
-      (uint8_t *)image_160_84);
-  timer_delay(1000);
-  size_t selected = 0;
+      (LCD_rectangle){.origin = {.x = 0, .y = 20}, .width = 160, .height = 39},
+      (uint8_t *)logo_opentitan_160_39);
+  timer_delay(1500);
 
+  size_t selected = 0;
   do {
     lcd_st7735_clean(&lcd);
 

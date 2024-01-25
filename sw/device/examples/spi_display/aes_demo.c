@@ -6,8 +6,8 @@
 
 #include "context.h"
 #include "demos.h"
-#include "lowrisc_logo.h"
-#include "Tux_80x95.h"
+// #include "lowrisc_logo.h"
+#include "images/logo_tux_80_95.h"
 // #include "ot_shape_80x80.h"
 #include "screen.h"
 #include "sw/device/lib/runtime/print.h"
