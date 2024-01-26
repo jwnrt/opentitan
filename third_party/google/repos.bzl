@@ -6,7 +6,6 @@ load("//rules:repo.bzl", "http_archive_or_local")
 
 def google_repos(
         rules_cc = None,
-        rules_pkg = None,
         absl = None,
         googletest = None):
     http_archive_or_local(
@@ -15,16 +14,6 @@ def google_repos(
         sha256 = "123ababe4be661f2fc9189d3b24deabc003926e87d991832cd46b6ae59f7b3c8",
         strip_prefix = "rules_cc-a636005ba28c0344da5110bd8532184c74b6ffdf",
         url = "https://github.com/bazelbuild/rules_cc/archive/a636005ba28c0344da5110bd8532184c74b6ffdf.tar.gz",
-    )
-
-    http_archive_or_local(
-        name = "rules_pkg",
-        local = rules_pkg,
-        urls = [
-            "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.7.0/rules_pkg-0.7.0.tar.gz",
-            "https://github.com/bazelbuild/rules_pkg/releases/download/0.7.0/rules_pkg-0.7.0.tar.gz",
-        ],
-        sha256 = "8a298e832762eda1830597d64fe7db58178aa84cd5926d76d5b744d6558941c2",
     )
 
     http_archive_or_local(
