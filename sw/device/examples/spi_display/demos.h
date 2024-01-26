@@ -8,6 +8,6 @@
 #include "screen.h"
 #include "sw/device/lib/base/status.h"
 
-status_t run_aes(context_t *app, dif_aes_mode_t mode);
+status_t run_aes(context_t *app);
 
 #endif

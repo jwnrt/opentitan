@@ -34,3 +34,17 @@ cc_library(
         "logo_tux_80_95.h",
     ],
 )
+
+cc_library(
+    name = "stronks_160_107px",
+    hdrs = [
+        "stronks_160_107.h",
+    ],
+)
+
+cc_library(
+    name = "ot_stronks_160_100px",
+    hdrs = [
+        "ot_stronks_160_100.h",
+    ],
+)

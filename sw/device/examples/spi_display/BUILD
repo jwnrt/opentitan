@@ -78,6 +78,7 @@ cc_library(
         "//sw/device/examples/spi_display/images:shape_opentitan_80_80px",
         "//sw/device/examples/spi_display/images:logo_lowrisc_05_80px",
         "//sw/device/examples/spi_display/images:logo_tux_80_95px",
+        "//sw/device/examples/spi_display/images:ot_stronks_160_100px",
         "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
     ],
 )

@@ -77,7 +77,7 @@ void screen_println(St7735Context *lcd, const char *str,
         (LCD_rectangle){.origin = {.x = 0, .y = pos.y},
                         .width = lcd->parent.width,
                         .height = lcd->parent.font->height},
-        0xffffff);
+        lcd->rgb_background);
   }
   // Draw the text.
   lcd_st7735_puts(lcd, pos, str);

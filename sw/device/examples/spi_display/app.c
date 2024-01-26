@@ -8,6 +8,7 @@
 #include "display_drivers/core/lucida_console_10pt.h"
 #include "display_drivers/st7735/lcd_st7735.h"
 #include "images/logo_opentitan_160_39.h"
+#include "images/ot_stronks_160_100.h"
 #include "screen.h"
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/testing/test_framework/check.h"
@@ -65,47 +66,59 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
       (uint8_t *)logo_opentitan_160_39);
   timer_delay(1500);
 
-  size_t selected = 0;
+  // size_t selected = 0;
   do {
     lcd_st7735_clean(&lcd);
 
-    // Show the main menu.
-    const char *items[] = {
-        "0. AES ECB",
-        "1. AES CDC",
-    };
-    Menu_t main_menu = {
-        .title = "Main menu",
-        .color = BGRColorBlue,
-        .selected_color = BGRColorRed,
-        .background = BGRColorWhite,
-        .items_count = sizeof(items) / sizeof(items[0]),
-        .items = items,
-    };
-    screen_show_menu(&lcd, &main_menu, selected);
+    // // Show the main menu.
+    // const char *items[] = {
+    //     "0. AES ECB/CDC",
+    //     "1. OTBN",
+    // };
+    // Menu_t main_menu = {
+    //     .title = "Main menu",
+    //     .color = BGRColorBlue,
+    //     .selected_color = BGRColorRed,
+    //     .background = BGRColorWhite,
+    //     .items_count = sizeof(items) / sizeof(items[0]),
+    //     .items = items,
+    // };
+    // screen_show_menu(&lcd, &main_menu, selected);
 
-    if (TRY(scan_buttons(&ctx, 1000)) == ctx.pins.usr_btn) {
-      lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Button 1 pressed");
-      timer_delay(1000);
-    }
+    // if (TRY(scan_buttons(&ctx, 1000)) == ctx.pins.usr_btn) {
+    //   lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Button 1 pressed");
+    //   timer_delay(1000);
+    // }
 
-    switch (selected) {
-      case 0: {
-        TRY(run_aes(&ctx, kDifAesModeEcb));
-        break;
-      }
-      case 1: {
-        TRY(run_aes(&ctx, kDifAesModeCbc));
-        break;
-      }
-      default:
-        break;
-    }
-    timer_delay(6000);
+    // switch (selected) {
+    //   case 0: {
+        TRY(run_aes(&ctx));
+    //     break;
+    //   }
+    //   case 1: {
+        // lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Not available yet");
+    //     break;
+    //   }
+    //   default:
+    //     break;
+    // }
+    timer_delay(5000);
+
+
     lcd_st7735_clean(&lcd);
-    screen_show_menu(&lcd, &main_menu, selected);
-    timer_delay(800);
-    selected = (selected + 1) % main_menu.items_count;
+    lcd_st7735_draw_rgb565(
+        &lcd,
+        (LCD_rectangle){.origin = {.x = 0, .y = 12}, .width = 160, .height = 100},
+        (uint8_t *)ot_stronks_160_100);
+
+    timer_delay(3000);
+
+
+    // lcd_st7735_clean(&lcd);
+    // screen_show_menu(&lcd, &main_menu, selected);
+    // timer_delay(800);
+
+    // selected = (selected + 1) % main_menu.items_count;
   } while (1);
 }
 
