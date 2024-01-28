@@ -5,6 +5,7 @@ bazel_dep(name = "buildifier_prebuilt", version = "6.4.0")
 bazel_dep(name = "rules_cc", version = "0.0.9")
 bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
 bazel_dep(name = "rules_pkg", version = "0.10.0")
+bazel_dep(name = "rules_python", version = "0.29.0")
 bazel_dep(name = "rules_rust", version = "0.38.0")
 
 # Rust toolchain.
@@ -31,3 +32,16 @@ crate.from_cargo(
     cargo_lockfile = "//third_party/rust:Cargo.lock",
 )
 use_repo(crate, "crate_index")
+
+# Python toolchain.
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.9")
+
+# Python dependencies.
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    python_version = "3.9",
+    requirements_lock = "//:python-requirements.txt",
+)
+use_repo(pip, ot_python_deps="pip")
