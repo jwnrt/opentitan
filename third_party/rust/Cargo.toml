@@ -89,10 +89,10 @@ strum = { version = "0.25", features = ["derive"] }
 # repo.  In OpenTitan, we create our own `@crate_index` repo which is
 # share globally among all bazel sub-repositories.
 
-# safe-ftdi = { git = "https://github.com/lowRISC/safe-ftdi" }
+safe-ftdi = { git = "https://github.com/lowRISC/safe-ftdi" }
 libftdi1-sys = "1.0.0"
 
-# serde_annotate = { git = "https://github.com/lowRISC/serde-annotate", branch="main"}
+serde_annotate = { git = "https://github.com/lowRISC/serde-annotate", branch="main"}
 anstyle = "1.0"
 pest = "2.2"
 pest_derive = "2.2"
