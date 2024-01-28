@@ -22,50 +22,6 @@ crt_register_toolchains(riscv32 = True)
 load("//third_party/github:repos.bzl", "github_tools_repos")
 github_tools_repos()
 
-# Various linters
-load("//third_party/lint:repos.bzl", "lint_repos")
-lint_repos()
-load("//third_party/lint:deps.bzl", "lint_deps")
-lint_deps()
-
-# Lychee link checker.
-load("//third_party/lychee:repos.bzl", "lychee_repos")
-lychee_repos()
-
-# Python Toolchain + PIP Dependencies
-load("//third_party/python:repos.bzl", "python_repos")
-python_repos()
-load("//third_party/python:deps.bzl", "python_deps")
-python_deps()
-load("//third_party/python:pip.bzl", "pip_deps")
-pip_deps()
-
-# Google/Bazel dependencies.  This needs to be after Python initialization
-# so that our preferred python configuration takes precedence.
-load("//third_party/google:repos.bzl", "google_repos")
-google_repos()
-load("//third_party/google:deps.bzl", "google_deps")
-google_deps()
-
-# Shellcheck
-load("//third_party/shellcheck:repos.bzl", "shellcheck_repos")
-shellcheck_repos()
-
-# Tock dependencies.
-load("//third_party/tock/crates:crates.bzl", tock_crate_repositories = "crate_repositories")
-tock_crate_repositories()
-load("//third_party/tock:repos.bzl", tock_repos="tock_repos")
-tock_repos(
-    # For developing tock/libtock along side OpenTitan, set these parameters
-    # to your local checkout of tock and libtock-rs respectively.
-    #tock = "../tock",
-    #libtock = "../libtock-rs",
-)
-
-# OpenOCD
-load("//third_party/openocd:repos.bzl", "openocd_repos")
-openocd_repos()
-
 # Protobuf Toolchain
 load("//third_party/protobuf:repos.bzl", "protobuf_repos")
 protobuf_repos()
