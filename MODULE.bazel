@@ -3,3 +3,29 @@ module(name = "opentitan")
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "buildifier_prebuilt", version = "6.4.0")
 bazel_dep(name = "rules_pkg", version = "0.10.0")
+bazel_dep(name = "rules_rust", version = "0.38.0")
+
+# Rust toolchain.
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.71.1", "nightly/2023-07-30"],
+    extra_target_triples = [
+        "riscv32imc-unknown-none-elf",
+    ],
+)
+rust.host_tools(
+    edition = "2021",
+    version = "1.71.1",
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+
+# Rust Crate dependencies.
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate.from_cargo(
+    name = "crate_index",
+    manifests = ["//third_party/rust:Cargo.toml"],
+    cargo_lockfile = "//third_party/rust:Cargo.lock",
+)
+use_repo(crate, "crate_index")

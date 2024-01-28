@@ -47,18 +47,6 @@ google_repos()
 load("//third_party/google:deps.bzl", "google_deps")
 google_deps()
 
-# Rust Toolchain + crates.io Dependencies
-load("//third_party/rust:repos.bzl", "rust_repos")
-rust_repos()
-load("//third_party/rust:deps.bzl", "rust_deps")
-rust_deps()
-
-load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
-crate_universe_dependencies(bootstrap = True)
-
-load("//third_party/rust/crates:crates.bzl", "crate_repositories")
-crate_repositories()
-
 # Shellcheck
 load("//third_party/shellcheck:repos.bzl", "shellcheck_repos")
 shellcheck_repos()
