@@ -7,8 +7,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 def go_repos():
     http_archive(
         name = "io_bazel_rules_go",
-        sha256 = "d6b2513456fe2229811da7eb67a444be7785f5323c6708b38d851d2b51e54d83",
-        urls = ["https://github.com/bazelbuild/rules_go/releases/download/v0.30.0/rules_go-v0.30.0.zip"],
+        sha256 = "6734a719993b1ba4ebe9806e853864395a8d3968ad27f9dd759c196b3eb3abe8",
+        urls = ["https://github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip"],
     )
     http_archive(
         name = "bazel_gazelle",
