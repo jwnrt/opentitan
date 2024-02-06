@@ -4669,10 +4669,11 @@ opentitan_test(
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:mmio",
         "//sw/device/lib/dif:uart",
+        "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/runtime:hart",
         "//sw/device/lib/testing:uart_testutils",
-        "//sw/device/lib/testing/test_framework:ottf_console",
         "//sw/device/lib/testing/test_framework:ottf_main",
         "//sw/device/lib/testing/test_framework:ottf_utils",
+        "//sw/device/lib/testing/test_framework:ottf_console",
     ],
 )

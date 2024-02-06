@@ -7,10 +7,13 @@
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_uart.h"
+#include "sw/device/lib/dif/dif_pinmux.h"
+#include "sw/device/lib/testing/uart_testutils.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_console.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
+#include "sw/device/lib/testing/test_framework/ottf_utils.h"
 
 #include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
 
@@ -29,16 +32,21 @@ enum {
   kBaudCountSilicon = 7,
   // The two highest Bauds won't work at the clock speed we run the FPGAs at.
   kBaudCountFpga = 5,
+  kTestTimeoutMillis = 500000,
 };
 
+static volatile uint8_t uart_idx = UINT8_MAX;
+static volatile uint32_t baud_rate = UINT32_MAX;
+
 static dif_uart_t uart;
+static dif_pinmux_t pinmux;
 
 OTTF_DEFINE_TEST_CONFIG(.console.test_may_clobber = true,
                         .enable_concurrency = false);
 
 // Send all bytes in `kSendData`, and check that they are received via the
 // loopback mechanism.
-void test_uart_baud(uint32_t baud_rate) {
+static status_t test_uart_baud(void) {
   CHECK_DIF_OK(dif_uart_configure(
       &uart, (dif_uart_config_t){
                  .baudrate = (uint32_t)baud_rate,
@@ -46,46 +54,58 @@ void test_uart_baud(uint32_t baud_rate) {
                  .parity_enable = kDifToggleDisabled,
                  .parity = kDifUartParityEven,
                  .tx_enable = kDifToggleEnabled,
-                 .rx_enable = kDifToggleDisabled,
+                 .rx_enable = kDifToggleEnabled,
              }));
 
-  CHECK_DIF_OK(
-      dif_uart_loopback_set(&uart, kDifUartLoopbackSystem, kDifToggleEnabled));
-  CHECK_DIF_OK(dif_uart_fifo_reset(&uart, kDifUartDatapathAll));
-  CHECK_DIF_OK(
-      dif_uart_set_enable(&uart, kDifUartDatapathRx, kDifToggleEnabled));
+  OTTF_WAIT_FOR(baud_rate == 0, kTestTimeoutMillis);
 
-  for (int i = 0; i < sizeof(kSendData); ++i) {
-    CHECK_DIF_OK(dif_uart_byte_send_polled(&uart, kSendData[i]));
+  LOG_INFO("Receiving data");
 
-    uint8_t receive_byte;
-    CHECK_DIF_OK(dif_uart_byte_receive_polled(&uart, &receive_byte));
-    CHECK(kSendData[i] == receive_byte, "expected %c, got %c", kSendData[i],
-          receive_byte);
+  CHECK_DIF_OK(dif_uart_watermark_rx_set(&uart, kDifUartWatermarkByte1));
+
+  uint8_t data[sizeof(kSendData)] = {0};
+  for (size_t i = 0; i < sizeof(data); ++i) {
+    CHECK_DIF_OK(dif_uart_byte_receive_polled(&uart, &data[i]));
+    LOG_INFO("got byte %d: %02x", i, data[i]);
   }
+
+  for (size_t i = 0; i < sizeof(data); ++i) {
+    CHECK_ARRAYS_EQ(data, kSendData, sizeof(kSendData));
+  }
+
+  LOG_INFO("Sending data");
+  CHECK_DIF_OK(dif_uart_bytes_send(&uart, kSendData, sizeof(kSendData), NULL));
+  LOG_INFO("Data sent");
+
+  return OK_STATUS();
 }
 
 bool test_main(void) {
-  // We test all four UARTs but in reverse order so that logging through UART0
-  // is preserved for as long as possible.
-  for (int8_t uart_idx = 3; uart_idx >= 0; uart_idx--) {
-    if (uart_idx == 0) {
-      LOG_INFO("Testing UART0 - console output will be disabled");
-    } else {
-      LOG_INFO("Testing UART%d", uart_idx);
-    }
+  OTTF_WAIT_FOR(uart_idx != 0xff, kTestTimeoutMillis);
 
-    mmio_region_t base_addr = mmio_region_from_addr(kBaseAddrs[uart_idx]);
-    CHECK_DIF_OK(dif_uart_init(base_addr, &uart));
+  mmio_region_t base_addr;
 
-    size_t baud_count =
-        kDeviceType == kDeviceSilicon ? kBaudCountSilicon : kBaudCountFpga;
+  base_addr = mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR);
+  CHECK_DIF_OK(dif_pinmux_init(base_addr, &pinmux));
 
-    // Check every baud rate is sent and received okay.
-    for (size_t baud_idx = 0; baud_idx < baud_count; ++baud_idx) {
-      EXECUTE_TEST(test_uart_baud, kBauds[baud_idx]);
-    }
+  base_addr = mmio_region_from_addr(kBaseAddrs[uart_idx]);
+  CHECK_DIF_OK(dif_uart_init(base_addr, &uart));
+
+  if (uart_idx == 0) {
+    CHECK_STATUS_OK(uart_testutils_select_pinmux(&pinmux, 1, kUartPinmuxChannelConsole));
+    ottf_console_configure_uart(TOP_EARLGREY_UART1_BASE_ADDR);
   }
 
-  return true;
+  CHECK_STATUS_OK(uart_testutils_select_pinmux(&pinmux, uart_idx, kUartPinmuxChannelDut));
+
+  size_t baud_count =
+      kDeviceType == kDeviceSilicon ? kBaudCountSilicon : kBaudCountFpga;
+
+  // Check every baud rate is sent and received okay.
+  status_t result = OK_STATUS();
+  for (size_t baud_idx = 0; baud_idx < baud_count; ++baud_idx) {
+    baud_rate = kBauds[baud_idx];
+    EXECUTE_TEST(result, test_uart_baud);
+  }
+  return status_ok(result);
 }
