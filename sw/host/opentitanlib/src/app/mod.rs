@@ -973,7 +973,7 @@ impl TransportWrapper {
             self.pin_strapping("PRERESET_DFT_DISABLE")?.apply()?;
         }
         self.pin_strapping("RESET")?.apply()?;
-        std::thread::sleep(reset_delay);
+        //std::thread::sleep(reset_delay);
         if clear_uart_rx {
             log::info!("Clearing the UART RX buffer");
             self.uart("console")?.clear_rx_buffer()?;
@@ -986,7 +986,7 @@ impl TransportWrapper {
             // sampled by then and we can resume our desired pin configuration.
             self.pin_strapping("PRERESET_DFT_DISABLE")?.remove()?;
         }
-        std::thread::sleep(reset_delay);
+        //std::thread::sleep(reset_delay);
         Ok(())
     }
 }
