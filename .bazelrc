@@ -17,7 +17,8 @@ build --features=-pedantic_warnings
 
 # Enable toolchain hardening features.
 # `guards` adds `unimp` guard instructions after unconditional jumps.
-build --features=guards
+# WIP: temporarily disable this make space in the ROM
+# build --features=guards
 
 # Use --config=disable_hardening to disable hardening to measure the
 # impact of the hardened sequences on code size.
