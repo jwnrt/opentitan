@@ -4,18 +4,14 @@
 
 load(
     "//rules/opentitan:defs.bzl",
+    "cw310_params",
     "opentitan_test",
-)
-load(
-    "//rules:opentitan_test.bzl",
-    "cw340_params",
-    "opentitan_functest",
 )
 
 package(default_visibility = ["//visibility:public"])
 
 opentitan_test(
-    name = "spi_display",
+    name = "spi_display_demo",
     srcs = [
         "main.c",
     ],
@@ -24,34 +20,11 @@ opentitan_test(
         "-ffreestanding",
         # Disable the date-time warning only for the hello world program.
         "-Wno-date-time",
-    ],  
+    ],
     exec_env = {
         "//hw/top_earlgrey:silicon_owner_sival_rom_ext": None,
-        # "//hw/top_earlgrey:fpga_cw340_test_rom": None,
-        # "//hw/top_earlgrey:silicon_owner_prodc_rom_ext": None,
+        "//hw/top_earlgrey:fpga_cw340_test_rom": None,
     },
-    deps = [
-        ":spi_display_app",
-        "//sw/device/lib/base:mmio",
-    ],
-)
-
-opentitan_functest(
-    name = "spi_display_fpga",
-    srcs = [
-        "main.c",
-        
-    ],
-    copts = [
-        "-nostdlib",
-        "-ffreestanding",
-        # Disable the date-time warning only for the hello world program.
-        "-Wno-date-time",
-    ],  
-    manifest = "//sw/device/silicon_creator/rom_ext:manifest_standard",
-    targets = [
-        "cw340_test_rom",
-    ],
     deps = [
         ":spi_display_app",
         "//sw/device/lib/base:mmio",
@@ -61,25 +34,25 @@ opentitan_functest(
 cc_library(
     name = "spi_display_app",
     srcs = [
+        "aes_demo.c",
         "app.c",
         "screen.c",
-        "aes_demo.c",
     ],
     hdrs = [
         "app.h",
-        "demos.h",
         "context.h",
+        "demos.h",
         "screen.h",
     ],
     deps = [
         ":spi_display_lib",
+        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
         "//sw/device/examples/spi_display/images:logo_ibex",
-        "//sw/device/examples/spi_display/images:logo_opentitan_160_39px",
-        "//sw/device/examples/spi_display/images:shape_opentitan_80_80px",
         "//sw/device/examples/spi_display/images:logo_lowrisc_05_80px",
+        "//sw/device/examples/spi_display/images:logo_opentitan_160_39px",
         "//sw/device/examples/spi_display/images:logo_tux_80_95px",
         "//sw/device/examples/spi_display/images:ot_stronks_160_100px",
-        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
+        "//sw/device/examples/spi_display/images:shape_opentitan_80_80px",
     ],
 )
 
@@ -107,4 +80,3 @@ cc_library(
         "//sw/device/lib/testing/test_framework:ottf_test_config",
     ],
 )
-

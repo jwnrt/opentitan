@@ -11,6 +11,6 @@
 #include "sw/device/lib/dif/dif_spi_host.h"
 
 status_t run_demo(dif_spi_host_t *spi_host, dif_gpio_t *gpio, dif_aes_t *aes,
-                  display_pin_map_t pins);
+                  display_pin_map_t pins, LCD_Orientation orientation);
 
 #endif  // OPENTITAN_SW_DEVICE_EXAMPLE_SPI_DISPLAY_MAIN_DEMO_H_

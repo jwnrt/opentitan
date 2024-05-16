@@ -20,7 +20,7 @@ static void timer_delay(uint32_t ms);
 static status_t scan_buttons(context_t *ctx, uint32_t timeout);
 
 status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
-                  display_pin_map_t pins) {
+                  display_pin_map_t pins, LCD_Orientation orientation) {
   LOG_INFO("%s: Initializing pins", __func__);
   // Set the initial state of the LCD control pins.
   TRY(dif_gpio_write(gpio, pins.dc, 0x0));
@@ -45,7 +45,7 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
   lcd_st7735_init(&lcd, &interface);
 
   // Set the LCD orientation.
-  lcd_st7735_set_orientation(&lcd, LCD_Rotate0);
+  lcd_st7735_set_orientation(&lcd, orientation);
 
   // Setup text font bitmaps to be used and the colors.
   lcd_st7735_set_font(&lcd, &lucidaConsole_10ptFont);
@@ -86,17 +86,17 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
     // screen_show_menu(&lcd, &main_menu, selected);
 
     // if (TRY(scan_buttons(&ctx, 1000)) == ctx.pins.usr_btn) {
-    //   lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Button 1 pressed");
-    //   timer_delay(1000);
+    //   lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Button 1
+    //   pressed"); timer_delay(1000);
     // }
 
     // switch (selected) {
     //   case 0: {
-        TRY(run_aes(&ctx));
+    TRY(run_aes(&ctx));
     //     break;
     //   }
     //   case 1: {
-        // lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Not available yet");
+    // lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Not available yet");
     //     break;
     //   }
     //   default:
@@ -104,15 +104,14 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
     // }
     timer_delay(5000);
 
-
     lcd_st7735_clean(&lcd);
     lcd_st7735_draw_rgb565(
         &lcd,
-        (LCD_rectangle){.origin = {.x = 0, .y = 12}, .width = 160, .height = 100},
+        (LCD_rectangle){
+            .origin = {.x = 0, .y = 12}, .width = 160, .height = 100},
         (uint8_t *)ot_stronks_160_100);
 
     timer_delay(3000);
-
 
     // lcd_st7735_clean(&lcd);
     // screen_show_menu(&lcd, &main_menu, selected);
