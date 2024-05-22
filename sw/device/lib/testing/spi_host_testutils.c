@@ -14,11 +14,11 @@
  * Define an spi pinmux configuration.
  */
 typedef struct spi_host1_pinmux_pins {
-  pinmux_testutils_mio_pin_t clk;
-  pinmux_testutils_mio_pin_t sd0;
-  pinmux_testutils_mio_pin_t sd1;
-  pinmux_testutils_mio_pin_t sd2;
-  pinmux_testutils_mio_pin_t sd3;
+  pinmux_testutils_mio_dict_t clk;
+  pinmux_testutils_mio_dict_t sd0;
+  pinmux_testutils_mio_dict_t sd1;
+  pinmux_testutils_mio_dict_t sd2;
+  pinmux_testutils_mio_dict_t sd3;
 } spi_host1_pinmux_pins_t;
 
 /**
@@ -30,85 +30,40 @@ static const spi_host1_pinmux_pins_t kSpiHost1PinmuxMap[] = {
         {
             .clk =
                 {
-                    .insel = kTopEarlgreyPinmuxInselConstantZero,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .in = kTopEarlgreyPinmuxInselConstantZero,
+                    .out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .pad = kTopEarlgreyMuxedPadsIoa3,
                 },
-            .sd0 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa5,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
-                },
-            .sd1 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa4,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa4,
-                },
-            .sd2 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa8,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa8,
-                },
-            .sd3 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa7,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa7,
-                },
+            .sd0 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa5),
+            .sd1 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa4),
+            .sd2 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa8),
+            .sd3 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa7),
         },
     [kSpiPinmuxPlatformIdCw340] =
         {
             .clk =
                 {
-                    .insel = kTopEarlgreyPinmuxInselConstantZero,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .in = kTopEarlgreyPinmuxInselConstantZero,
+                    .out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .pad = kTopEarlgreyMuxedPadsIoa3,
                 },
-            .sd0 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa5,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
-                },
-            .sd1 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa4,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa4,
-                },
-            .sd2 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa8,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa8,
-                },
-            .sd3 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa7,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa7,
-                },
+            .sd0 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa5),
+            .sd1 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa4),
+            .sd2 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa8),
+            .sd3 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa7),
         },
     [kSpiPinmuxPlatformIdTeacup] =
         {
             .clk =
                 {
-                    .insel = kTopEarlgreyPinmuxInselConstantZero,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .in = kTopEarlgreyPinmuxInselConstantZero,
+                    .out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .pad = kTopEarlgreyMuxedPadsIoa3,
                 },
-            .sd0 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa4,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa4,
-                },
-            .sd1 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa5,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
-                },
-            .sd2 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa8,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa8,
-                },
-            .sd3 =
-                {
-                    .insel = kTopEarlgreyPinmuxInselIoa7,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa7,
-                },
+            .sd0 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa4),
+            .sd1 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa5),
+            .sd2 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa8),
+            .sd3 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioa7),
         },
 };
 
@@ -137,28 +92,28 @@ status_t spi_host1_pinmux_connect_to_bob(const dif_pinmux_t *pinmux,
   TRY(dif_pinmux_output_select(pinmux, csb_outsel,
                                kTopEarlgreyPinmuxOutselSpiHost1Csb));
   // SCLK.
-  TRY(dif_pinmux_output_select(pinmux, platform->clk.mio_out,
+  TRY(dif_pinmux_output_select(pinmux, platform->clk.out,
                                kTopEarlgreyPinmuxOutselSpiHost1Sck));
   // SD0.
   TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd0,
-                              platform->sd0.insel));
-  TRY(dif_pinmux_output_select(pinmux, platform->sd0.mio_out,
+                              platform->sd0.in));
+  TRY(dif_pinmux_output_select(pinmux, platform->sd0.out,
                                kTopEarlgreyPinmuxOutselSpiHost1Sd0));
 
   // SD1.
   TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd1,
-                              platform->sd1.insel));
-  TRY(dif_pinmux_output_select(pinmux, platform->sd1.mio_out,
+                              platform->sd1.in));
+  TRY(dif_pinmux_output_select(pinmux, platform->sd1.out,
                                kTopEarlgreyPinmuxOutselSpiHost1Sd1));
   // SD2.
   TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd2,
-                              platform->sd2.insel));
-  TRY(dif_pinmux_output_select(pinmux, platform->sd2.mio_out,
+                              platform->sd2.in));
+  TRY(dif_pinmux_output_select(pinmux, platform->sd2.out,
                                kTopEarlgreyPinmuxOutselSpiHost1Sd2));
   // SD3.
   TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd3,
-                              platform->sd3.insel));
-  TRY(dif_pinmux_output_select(pinmux, platform->sd3.mio_out,
+                              platform->sd3.in));
+  TRY(dif_pinmux_output_select(pinmux, platform->sd3.out,
                                kTopEarlgreyPinmuxOutselSpiHost1Sd3));
   return OK_STATUS();
 }

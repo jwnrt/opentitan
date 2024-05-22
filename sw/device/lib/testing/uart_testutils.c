@@ -25,42 +25,42 @@
 /**
  * This table stores the pins for all UART instances of Earlgrey.
  */
-static const pinmux_testutils_peripheral_pin_t kUartPinmuxPins[] = {
+static const pinmux_testutils_peripheral_mio_dict_t kUartPinmuxPins[] = {
     // UART0.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart0Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart0Tx,
+        .in = kTopEarlgreyPinmuxPeripheralInUart0Rx,
+        .out = kTopEarlgreyPinmuxOutselUart0Tx,
     },
     // UART1.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart1Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart1Tx,
+        .in = kTopEarlgreyPinmuxPeripheralInUart1Rx,
+        .out = kTopEarlgreyPinmuxOutselUart1Tx,
     },
     // UART2.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart2Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart2Tx,
+        .in = kTopEarlgreyPinmuxPeripheralInUart2Rx,
+        .out = kTopEarlgreyPinmuxOutselUart2Tx,
     },
     // UART3.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart3Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart3Tx,
+        .in = kTopEarlgreyPinmuxPeripheralInUart3Rx,
+        .out = kTopEarlgreyPinmuxOutselUart3Tx,
     },
 };
 
 /**
  * This table stores UART pin mappings for synthesized platforms.
  */
-static const pinmux_testutils_mio_pin_t
+static const pinmux_testutils_mio_dict_t
     kUartSynthPins[kUartPinmuxChannelCount] = {
         [kUartPinmuxChannelConsole] =
             {
-                .mio_out = kTopEarlgreyPinmuxMioOutIoc4,
-                .insel = kTopEarlgreyPinmuxInselIoc3,
+                .out = kTopEarlgreyPinmuxMioOutIoc4,
+                .in = kTopEarlgreyPinmuxInselIoc3,
             },
         [kUartPinmuxChannelDut] = {
-            .mio_out = kTopEarlgreyPinmuxMioOutIob5,
-            .insel = kTopEarlgreyPinmuxInselIob4,
+            .out = kTopEarlgreyPinmuxMioOutIob5,
+            .in = kTopEarlgreyPinmuxInselIob4,
         }};
 
 /**
@@ -68,26 +68,26 @@ static const pinmux_testutils_mio_pin_t
  * their own channels that they map to rather than using one channel for the
  * console and second for the DUT.
  */
-static const pinmux_testutils_mio_pin_t kUartDvPins[4] = {
+static const pinmux_testutils_mio_dict_t kUartDvPins[4] = {
     // UART0.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIoc4,
-        .insel = kTopEarlgreyPinmuxInselIoc3,
+        .out = kTopEarlgreyPinmuxMioOutIoc4,
+        .in = kTopEarlgreyPinmuxInselIoc3,
     },
     // UART1.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIob5,
-        .insel = kTopEarlgreyPinmuxInselIob4,
+        .out = kTopEarlgreyPinmuxMioOutIob5,
+        .in = kTopEarlgreyPinmuxInselIob4,
     },
     // UART2.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
-        .insel = kTopEarlgreyPinmuxInselIoa4,
+        .out = kTopEarlgreyPinmuxMioOutIoa5,
+        .in = kTopEarlgreyPinmuxInselIoa4,
     },
     // UART3.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIoa1,
-        .insel = kTopEarlgreyPinmuxInselIoa0,
+        .out = kTopEarlgreyPinmuxMioOutIoa1,
+        .in = kTopEarlgreyPinmuxInselIoa0,
     }};
 
 static const uart_cfg_params_t kUartCfgParams[4] = {
@@ -147,14 +147,14 @@ status_t uart_testutils_select_pinmux(const dif_pinmux_t *pinmux,
                 uart_idx < ARRAYSIZE(kUartPinmuxPins),
             "Index out of bounds");
 
-  pinmux_testutils_mio_pin_t mio_pin = kDeviceType == kDeviceSimDV
-                                           ? kUartDvPins[uart_idx]
-                                           : kUartSynthPins[channel];
+  pinmux_testutils_mio_dict_t mio_pin = kDeviceType == kDeviceSimDV
+                                            ? kUartDvPins[uart_idx]
+                                            : kUartSynthPins[channel];
 
-  TRY(dif_pinmux_input_select(pinmux, kUartPinmuxPins[uart_idx].peripheral_in,
-                              mio_pin.insel));
-  TRY(dif_pinmux_output_select(pinmux, mio_pin.mio_out,
-                               kUartPinmuxPins[uart_idx].outsel));
+  TRY(dif_pinmux_input_select(pinmux, kUartPinmuxPins[uart_idx].in,
+                              mio_pin.in));
+  TRY(dif_pinmux_output_select(pinmux, mio_pin.out,
+                               kUartPinmuxPins[uart_idx].out));
 
   return OK_STATUS();
 }
@@ -163,7 +163,7 @@ status_t uart_testutils_detach_pinmux(const dif_pinmux_t *pinmux,
                                       uint8_t uart_idx) {
   TRY_CHECK(uart_idx < ARRAYSIZE(kUartPinmuxPins), "Index out of bounds");
 
-  TRY(dif_pinmux_input_select(pinmux, kUartPinmuxPins[uart_idx].peripheral_in,
+  TRY(dif_pinmux_input_select(pinmux, kUartPinmuxPins[uart_idx].in,
                               kTopEarlgreyPinmuxInselConstantZero));
 
   return OK_STATUS();

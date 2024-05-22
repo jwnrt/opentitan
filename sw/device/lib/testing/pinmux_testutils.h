@@ -14,20 +14,39 @@
 #include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
 
 /**
- * Define a pinmux configuration for a peripheral input and output .
+ * Defines a pinmux mapping of the input and output of a peripheral pin.
  */
-typedef struct pinmux_testutils_peripheral_pin {
-  const top_earlgrey_pinmux_peripheral_in_t peripheral_in;
-  const top_earlgrey_pinmux_outsel_t outsel;
-} pinmux_testutils_peripheral_pin_t;
+typedef struct pinmux_testutils_peripheral_mio_dict {
+  // Peripheral input
+  const top_earlgrey_pinmux_peripheral_in_t in;
+
+  // Peripheral output
+  const top_earlgrey_pinmux_outsel_t out;
+} pinmux_testutils_peripheral_mio_dict_t;
+
+#define PINMUX_TESTUTILS_NEW_PERIPHERAL_MIO_DICT(_peripheral_pin) \
+  {                                                               \
+    .in = kTopEarlgreyPinmuxPeripheralIn##_peripheral_pin,        \
+    .out = kTopEarlgreyPinmuxOutsel##_peripheral_pin,             \
+  }
 
 /**
- * Define a pinmux configuration for a mio input and output.
+ * Defines a pinmux mapping of a mio input, mio output and mio pad.
  */
-typedef struct pinmux_testutils_mio_pin {
-  const top_earlgrey_pinmux_mio_out_t mio_out;
-  const top_earlgrey_pinmux_insel_t insel;
-} pinmux_testutils_mio_pin_t;
+typedef struct pinmux_testutils_mio_dict {
+  const top_earlgrey_pinmux_mio_out_t out;
+  const top_earlgrey_pinmux_insel_t in;
+  const top_earlgrey_muxed_pads_t pad;
+} pinmux_testutils_mio_dict_t;
+
+// clang-format off
+#define PINMUX_TESTUTILS_NEW_MIO_DICT(_pin)\
+  {                                        \
+    .in = kTopEarlgreyPinmuxInsel##_pin,   \
+    .out = kTopEarlgreyPinmuxMioOut##_pin, \
+    .pad = kTopEarlgreyMuxedPads##_pin,    \
+  }
+// clang-format on
 
 /**
  * Default pinmux initialization.
