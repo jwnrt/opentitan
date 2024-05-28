@@ -8,6 +8,8 @@
 #include "string.h"
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/runtime/print.h"
+static void screen_select_item(St7735Context *lcd, size_t selected,
+                               uint32_t color);
 
 void screen_show_menu(St7735Context *lcd, Menu_t *menu, size_t selected) {
   size_t line = 0;
@@ -28,29 +30,37 @@ void screen_show_menu(St7735Context *lcd, Menu_t *menu, size_t selected) {
     screen_println(lcd, menu->items[i], alined_left, line++, false);
   }
 
-  // Drow a boarder around the selected item.
   selected++;
+  // Erase selection.
+  screen_select_item(lcd, menu->last_selected, menu->background);
+  // Draw a border around the selected item.
+  menu->last_selected = selected;
+  screen_select_item(lcd, selected, menu->selected_color);
+}
+
+static void screen_select_item(St7735Context *lcd, size_t selected,
+                               uint32_t color) {
   lcd_st7735_draw_horizontal_line(
       lcd,
       (LCD_Line){{.x = 0, .y = lcd->parent.font->height * selected},
                  lcd->parent.width},
-      menu->selected_color);
+      color);
   lcd_st7735_draw_horizontal_line(
       lcd,
       (LCD_Line){{.x = 0, .y = lcd->parent.font->height * (selected + 1) - 1},
                  lcd->parent.width},
-      menu->selected_color);
+      color);
   lcd_st7735_draw_vertical_line(
       lcd,
       (LCD_Line){{.x = 0, .y = lcd->parent.font->height * selected},
                  lcd->parent.font->height - 1},
-      menu->selected_color);
+      color);
   lcd_st7735_draw_vertical_line(
       lcd,
       (LCD_Line){{.x = lcd->parent.width - 1,
                   .y = lcd->parent.font->height * selected},
                  lcd->parent.font->height - 1},
-      menu->selected_color);
+      color);
 }
 
 void screen_println(St7735Context *lcd, const char *str,

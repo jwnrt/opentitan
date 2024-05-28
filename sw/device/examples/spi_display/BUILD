@@ -3,7 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 load(
+    "@bazel_skylib//lib:dicts.bzl",
+    "dicts",
+)
+load(
     "//rules/opentitan:defs.bzl",
+    "EARLGREY_SILICON_OWNER_ROM_EXT_ENVS",
     "cw310_params",
     "opentitan_test",
 )
@@ -21,10 +26,12 @@ opentitan_test(
         # Disable the date-time warning only for the hello world program.
         "-Wno-date-time",
     ],
-    exec_env = {
-        "//hw/top_earlgrey:silicon_owner_sival_rom_ext": None,
-        "//hw/top_earlgrey:fpga_cw340_test_rom": None,
-    },
+    exec_env = dicts.add(
+        EARLGREY_SILICON_OWNER_ROM_EXT_ENVS,
+        {
+            "//hw/top_earlgrey:fpga_cw340_test_rom": None,
+        }
+    ),
     deps = [
         ":spi_display_app",
         "//sw/device/lib/base:mmio",

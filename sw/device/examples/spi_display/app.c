@@ -13,14 +13,19 @@
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
+enum {
+  kBtnDebounceMillis = 40,
+};
 // Local functions declaration.
 static uint32_t spi_write(void *handle, uint8_t *data, size_t len);
 static uint32_t gpio_write(void *handle, bool cs, bool dc);
 static void timer_delay(uint32_t ms);
 static status_t scan_buttons(context_t *ctx, uint32_t timeout);
+static status_t aes_demo(context_t *ctx);
 
-status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
-                  display_pin_map_t pins, LCD_Orientation orientation) {
+status_t run_demo(dif_spi_host_t *spi_lcd, dif_spi_host_t *spi_flash,
+                  dif_gpio_t *gpio, dif_aes_t *aes, display_pin_map_t pins,
+                  LCD_Orientation orientation) {
   LOG_INFO("%s: Initializing pins", __func__);
   // Set the initial state of the LCD control pins.
   TRY(dif_gpio_write(gpio, pins.dc, 0x0));
@@ -34,7 +39,7 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
 
   // Init LCD driver and set the SPI driver.
   St7735Context lcd;
-  context_t ctx = {spi, gpio, aes, pins, &lcd};
+  context_t ctx = {spi_lcd, spi_flash, gpio, aes, pins, &lcd};
   LCD_Interface interface = {
       .handle = &ctx,              // SPI handle.
       .spi_write = spi_write,      // SPI write callback.
@@ -66,71 +71,100 @@ status_t run_demo(dif_spi_host_t *spi, dif_gpio_t *gpio, dif_aes_t *aes,
       (uint8_t *)logo_opentitan_160_39);
   timer_delay(1500);
 
-  // size_t selected = 0;
+  size_t selected = 0;
+  LOG_INFO("%s: Starting menu.", __func__);
+  // Show the main menu.
+  const char *items[] = {
+      "1. AES ECB/CDC",
+      "2. SPI passthru",
+      "3. Another demo",
+      "4. Yet another demo",
+  };
+  Menu_t main_menu = {
+      .title = "Demo mode",
+      .color = BGRColorBlue,
+      .selected_color = BGRColorRed,
+      .background = BGRColorWhite,
+      .items_count = sizeof(items) / sizeof(items[0]),
+      .items = items,
+  };
+  lcd_st7735_clean(&lcd);
   do {
-    lcd_st7735_clean(&lcd);
+    screen_show_menu(&lcd, &main_menu, selected);
+    status_t ret = scan_buttons(&ctx, 1000);
 
-    // // Show the main menu.
-    // const char *items[] = {
-    //     "0. AES ECB/CDC",
-    //     "1. OTBN",
-    // };
-    // Menu_t main_menu = {
-    //     .title = "Main menu",
-    //     .color = BGRColorBlue,
-    //     .selected_color = BGRColorRed,
-    //     .background = BGRColorWhite,
-    //     .items_count = sizeof(items) / sizeof(items[0]),
-    //     .items = items,
-    // };
-    // screen_show_menu(&lcd, &main_menu, selected);
+    if (!status_ok(ret)) {
+      continue;
+    }
 
-    // if (TRY(scan_buttons(&ctx, 1000)) == ctx.pins.usr_btn) {
-    //   lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Button 1
-    //   pressed"); timer_delay(1000);
-    // }
-
-    // switch (selected) {
-    //   case 0: {
-    TRY(run_aes(&ctx));
-    //     break;
-    //   }
-    //   case 1: {
-    // lcd_st7735_puts(&lcd, (LCD_Point){.x = 5, .y = 80}, "Not available yet");
-    //     break;
-    //   }
-    //   default:
-    //     break;
-    // }
-    timer_delay(5000);
-
-    lcd_st7735_clean(&lcd);
-    lcd_st7735_draw_rgb565(
-        &lcd,
-        (LCD_rectangle){
-            .origin = {.x = 0, .y = 12}, .width = 160, .height = 100},
-        (uint8_t *)ot_stronks_160_100);
-
-    timer_delay(3000);
-
-    // lcd_st7735_clean(&lcd);
-    // screen_show_menu(&lcd, &main_menu, selected);
-    // timer_delay(800);
-
-    // selected = (selected + 1) % main_menu.items_count;
+    switch (UNWRAP(ret)) {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+        selected = (size_t)UNWRAP(ret);
+        break;
+      case 4:
+        switch (selected) {
+          case 0:
+            TRY(aes_demo(&ctx));
+            break;
+          default:
+            screen_println(&lcd, "Option not avail!", alined_center, 8, true);
+            break;
+        }
+        break;
+      default:
+        break;
+    }
   } while (1);
+}
+
+static status_t aes_demo(context_t *ctx) {
+  TRY(run_aes(ctx));
+  timer_delay(5000);
+
+  lcd_st7735_clean(ctx->lcd);
+  lcd_st7735_draw_rgb565(
+      ctx->lcd,
+      (LCD_rectangle){.origin = {.x = 0, .y = 12}, .width = 160, .height = 100},
+      (uint8_t *)ot_stronks_160_100);
+
+  timer_delay(3000);
+  lcd_st7735_clean(ctx->lcd);
+  return OK_STATUS();
+}
+
+static status_t spi_passthru_demo(context_t *ctx) {
+  lcd_st7735_clean(ctx->lcd);
+  while (true) {
+    screen_println(ctx->lcd, "Option not avail!", alined_center, 5, true);
+  }
 }
 
 status_t scan_buttons(context_t *ctx, uint32_t timeout) {
   ibex_timeout_t deadline = ibex_timeout_init(timeout * 1000);
+  dif_gpio_pin_t pins[] = {ctx->pins.btn_up, ctx->pins.btn_down,
+                           ctx->pins.btn_left, ctx->pins.btn_right,
+                           ctx->pins.btn_ok};
+  static size_t i = 0;
   do {
-    bool state = false;
-    TRY(dif_gpio_read(ctx->gpio, ctx->pins.usr_btn, &state));
-    if (state) {
-      return OK_STATUS((int32_t)ctx->pins.usr_btn);
+    i = (i + 1) % ARRAYSIZE(pins);
+    bool state = true;
+    TRY(dif_gpio_read(ctx->gpio, pins[i], &state));
+    if (!state) {
+      timer_delay(kBtnDebounceMillis);
+      TRY(dif_gpio_read(ctx->gpio, pins[i], &state));
+      if (!state) {
+        LOG_INFO("Pin[%u]:%u pressed", i, pins[i]);
+        return OK_STATUS((int32_t)i);
+      }
     }
+
   } while (!ibex_timeout_check(&deadline));
-  return OK_STATUS();
+
+  LOG_INFO("Btn scan timeout");
+  return DEADLINE_EXCEEDED();
 }
 
 static uint32_t spi_write(void *handle, uint8_t *data, size_t len) {
@@ -144,11 +178,12 @@ static uint32_t spi_write(void *handle, uint8_t *data, size_t len) {
                                             .buf = data,
                                             .length = len,
                                         }};
-  CHECK_DIF_OK(dif_spi_host_transaction(ctx->spi, /*csid=*/0, &transaction, 1));
+  CHECK_DIF_OK(
+      dif_spi_host_transaction(ctx->spi_lcd, /*csid=*/0, &transaction, 1));
   ibex_timeout_t deadline = ibex_timeout_init(5000);
   dif_spi_host_status_t status;
   do {
-    CHECK_DIF_OK(dif_spi_host_get_status(ctx->spi, &status));
+    CHECK_DIF_OK(dif_spi_host_get_status(ctx->spi_lcd, &status));
     if (ibex_timeout_check(&deadline)) {
       LOG_INFO("%s, Timeout", __func__);
       return 0;

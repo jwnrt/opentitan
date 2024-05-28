@@ -13,6 +13,9 @@
 #include "sw/device/lib/dif/dif_spi_host.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/log.h"
+#include "sw/device/lib/testing/spi_device_testutils.h"
+#include "sw/device/lib/testing/spi_flash_emulator.h"
+#include "sw/device/lib/testing/spi_flash_testutils.h"
 #include "sw/device/lib/runtime/print.h"
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
@@ -29,6 +32,11 @@ typedef struct Platform {
   pinmux_testutils_mio_dict_t reset;
   pinmux_testutils_mio_dict_t dc;
   pinmux_testutils_mio_dict_t led;
+  pinmux_testutils_mio_dict_t btn_up;
+  pinmux_testutils_mio_dict_t btn_down;
+  pinmux_testutils_mio_dict_t btn_left;
+  pinmux_testutils_mio_dict_t btn_right;
+  pinmux_testutils_mio_dict_t btn_ok;
   size_t spi_speed;
   LCD_Orientation orientation;
 } Platform_t;
@@ -62,6 +70,11 @@ static const Platform_t kVoyager1Board = {
     .reset = PINMUX_TESTUTILS_NEW_MIO_DICT(Ior4),
     .dc = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc9),
     .led = PINMUX_TESTUTILS_NEW_MIO_DICT(Ior1),
+    .btn_up = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc10),
+    .btn_down = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc11),
+    .btn_left = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc12),
+    .btn_right = PINMUX_TESTUTILS_NEW_MIO_DICT(Ior0),
+    .btn_ok = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob1),
     .spi_speed = 22000000,  // 22Mhz
     .orientation = LCD_Rotate180,
 };
@@ -87,6 +100,21 @@ static status_t pinmux_select(const dif_pinmux_t *pinmux, Platform_t pinmap) {
   TRY(dif_pinmux_output_select(pinmux, pinmap.led.out,
                                kTopEarlgreyPinmuxOutselGpioGpio2));
 
+  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInGpioGpio4,
+                              pinmap.btn_up.in));
+
+  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInGpioGpio5,
+                              pinmap.btn_down.in));
+
+  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInGpioGpio6,
+                              pinmap.btn_left.in));
+
+  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInGpioGpio7,
+                              pinmap.btn_right.in));
+
+  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInGpioGpio8,
+                              pinmap.btn_ok.in));
+
   if (kDeviceType == kDeviceSilicon) {
     dif_pinmux_pad_attr_t out_attr;
     dif_pinmux_pad_attr_t in_attr = {
@@ -102,11 +130,13 @@ static status_t pinmux_select(const dif_pinmux_t *pinmux, Platform_t pinmap) {
     TRY(dif_pinmux_pad_write_attrs(pinmux, pinmap.csb.pad, kDifPinmuxPadKindMio,
                                    in_attr, &out_attr));
   }
+
   return OK_STATUS();
 }
 
 bool test_main(void) {
-  dif_spi_host_t spi_host;
+  dif_spi_host_t spi_lcd;
+  dif_spi_host_t spi_flash;
   const volatile Platform_t *config = NULL;
   switch (kDeviceType) {
     case kDeviceFpgaCw340:
@@ -123,38 +153,54 @@ bool test_main(void) {
   }
 
   dif_pinmux_t pinmux;
-  CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
-
+  mmio_region_t addr = mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR);
+  CHECK_DIF_OK(dif_pinmux_init(addr, &pinmux));
   pinmux_select(&pinmux, *config);
 
-  CHECK_DIF_OK(dif_spi_host_init(
-      mmio_region_from_addr(TOP_EARLGREY_SPI_HOST1_BASE_ADDR), &spi_host));
-
-  CHECK(kClockFreqUsbHz <= UINT32_MAX,
-        "kClockFreqPeripheralHz must fit in uint32_t");
-
+  addr = mmio_region_from_addr(TOP_EARLGREY_SPI_HOST1_BASE_ADDR);
+  CHECK_DIF_OK(dif_spi_host_init(addr, &spi_lcd));
   CHECK_DIF_OK(dif_spi_host_configure(
-                   &spi_host,
+                   &spi_lcd,
                    (dif_spi_host_config_t){
                        .spi_clock = config->spi_speed,
                        .peripheral_clock_freq_hz = (uint32_t)kClockFreqUsbHz,
                    }),
-               "SPI_HOST config failed!");
-  CHECK_DIF_OK(dif_spi_host_output_set_enabled(&spi_host, true));
+               "SPI_HOST 1 config failed!");
+  CHECK_DIF_OK(dif_spi_host_output_set_enabled(&spi_lcd, true));
 
+  addr = mmio_region_from_addr(TOP_EARLGREY_SPI_HOST0_BASE_ADDR);
+  CHECK_DIF_OK(dif_spi_host_init(addr, &spi_flash));
+  CHECK_DIF_OK(
+      dif_spi_host_configure(&spi_flash,
+                             (dif_spi_host_config_t){
+                                 .spi_clock = config->spi_speed,
+                                 .peripheral_clock_freq_hz =
+                                     (uint32_t)kClockFreqHiSpeedPeripheralHz,
+                             }),
+      "SPI_HOST0 config failed!");
+  CHECK_DIF_OK(dif_spi_host_output_set_enabled(&spi_lcd, true));
+
+  dif_spi_device_handle_t spid;
+  addr = mmio_region_from_addr(TOP_EARLGREY_SPI_DEVICE_BASE_ADDR);
+  CHECK_DIF_OK(dif_spi_device_init_handle(addr, &spid));
+  CHECK_STATUS_OK(spi_device_testutils_configure_passthrough(
+      &spid,
+      /*filters=*/0x00,
+      /*upload_write_commands=*/false));
+
+  addr = mmio_region_from_addr(TOP_EARLGREY_GPIO_BASE_ADDR);
   dif_gpio_t gpio;
-  CHECK_DIF_OK(
-      dif_gpio_init(mmio_region_from_addr(TOP_EARLGREY_GPIO_BASE_ADDR), &gpio));
-  CHECK_DIF_OK(dif_gpio_output_set_enabled_all(&gpio, 0x0f));
+  CHECK_DIF_OK(dif_gpio_init(addr, &gpio));
+  CHECK_DIF_OK(dif_gpio_output_set_enabled_all(&gpio, 0xf));
 
+  addr = mmio_region_from_addr(TOP_EARLGREY_AES_BASE_ADDR);
   dif_aes_t aes;
-  // Initialise AES.
-  CHECK_DIF_OK(
-      dif_aes_init(mmio_region_from_addr(TOP_EARLGREY_AES_BASE_ADDR), &aes));
+  CHECK_DIF_OK(dif_aes_init(addr, &aes));
   CHECK_DIF_OK(dif_aes_reset(&aes));
 
-  run_demo(&spi_host, &gpio, &aes, (display_pin_map_t){0, 1, 2, 3, 4}, config->orientation);
+  run_demo(&spi_lcd, &spi_flash, &gpio, &aes,
+           (display_pin_map_t){0, 1, 2, 11, 4, 5, 6, 7, 8},
+           config->orientation);
 
   return true;
 }

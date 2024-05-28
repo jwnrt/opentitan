@@ -11,11 +11,16 @@ typedef struct display_pin_map {
   dif_gpio_pin_t dc;
   dif_gpio_pin_t led;
   dif_gpio_pin_t cs;
-  dif_gpio_pin_t usr_btn;
+  dif_gpio_pin_t btn_up;
+  dif_gpio_pin_t btn_down;
+  dif_gpio_pin_t btn_left;
+  dif_gpio_pin_t btn_right;
+  dif_gpio_pin_t btn_ok;
 } display_pin_map_t;
 
 typedef struct context {
-  dif_spi_host_t *spi;
+  dif_spi_host_t *spi_lcd;
+  dif_spi_host_t *spi_flash;
   dif_gpio_t *gpio;
   dif_aes_t *aes;
   display_pin_map_t pins;

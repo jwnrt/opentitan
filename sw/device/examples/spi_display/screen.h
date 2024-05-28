@@ -46,6 +46,7 @@ typedef struct Menu {
   uint32_t color;           // Foreground color (text color).
   uint32_t background;      // Background color.
   uint32_t selected_color;  // Color of the selection box.
+  uint32_t last_selected;
 } Menu_t;
 
 /**
