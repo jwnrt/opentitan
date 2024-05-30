@@ -178,15 +178,11 @@ bool test_main(void) {
                                      (uint32_t)kClockFreqHiSpeedPeripheralHz,
                              }),
       "SPI_HOST0 config failed!");
-  CHECK_DIF_OK(dif_spi_host_output_set_enabled(&spi_lcd, true));
+
 
   dif_spi_device_handle_t spid;
   addr = mmio_region_from_addr(TOP_EARLGREY_SPI_DEVICE_BASE_ADDR);
   CHECK_DIF_OK(dif_spi_device_init_handle(addr, &spid));
-  CHECK_STATUS_OK(spi_device_testutils_configure_passthrough(
-      &spid,
-      /*filters=*/0x00,
-      /*upload_write_commands=*/false));
 
   addr = mmio_region_from_addr(TOP_EARLGREY_GPIO_BASE_ADDR);
   dif_gpio_t gpio;
@@ -198,7 +194,7 @@ bool test_main(void) {
   CHECK_DIF_OK(dif_aes_init(addr, &aes));
   CHECK_DIF_OK(dif_aes_reset(&aes));
 
-  run_demo(&spi_lcd, &spi_flash, &gpio, &aes,
+  run_demo(&spi_lcd, &spi_flash, &spid, &gpio, &aes,
            (display_pin_map_t){0, 1, 2, 11, 4, 5, 6, 7, 8},
            config->orientation);
 

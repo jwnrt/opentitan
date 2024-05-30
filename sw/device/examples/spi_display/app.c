@@ -10,7 +10,11 @@
 #include "images/logo_opentitan_160_39.h"
 #include "images/ot_stronks_160_100.h"
 #include "screen.h"
+#include "sw/device/lib/dif/dif_spi_host.h"
 #include "sw/device/lib/runtime/ibex.h"
+#include "sw/device/lib/testing/spi_device_testutils.h"
+#include "sw/device/lib/testing/spi_flash_emulator.h"
+#include "sw/device/lib/testing/spi_flash_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
 enum {
@@ -21,10 +25,13 @@ static uint32_t spi_write(void *handle, uint8_t *data, size_t len);
 static uint32_t gpio_write(void *handle, bool cs, bool dc);
 static void timer_delay(uint32_t ms);
 static status_t scan_buttons(context_t *ctx, uint32_t timeout);
+static status_t notavail_demo(context_t *ctx);
 static status_t aes_demo(context_t *ctx);
+static status_t spi_passthru_demo(context_t *ctx);
 
 status_t run_demo(dif_spi_host_t *spi_lcd, dif_spi_host_t *spi_flash,
-                  dif_gpio_t *gpio, dif_aes_t *aes, display_pin_map_t pins,
+                  dif_spi_device_handle_t *spid, dif_gpio_t *gpio,
+                  dif_aes_t *aes, display_pin_map_t pins,
                   LCD_Orientation orientation) {
   LOG_INFO("%s: Initializing pins", __func__);
   // Set the initial state of the LCD control pins.
@@ -39,7 +46,7 @@ status_t run_demo(dif_spi_host_t *spi_lcd, dif_spi_host_t *spi_flash,
 
   // Init LCD driver and set the SPI driver.
   St7735Context lcd;
-  context_t ctx = {spi_lcd, spi_flash, gpio, aes, pins, &lcd};
+  context_t ctx = {spi_lcd, spi_flash, spid, gpio, aes, pins, &lcd};
   LCD_Interface interface = {
       .handle = &ctx,              // SPI handle.
       .spi_write = spi_write,      // SPI write callback.
@@ -109,6 +116,9 @@ status_t run_demo(dif_spi_host_t *spi_lcd, dif_spi_host_t *spi_flash,
           case 0:
             TRY(aes_demo(&ctx));
             break;
+          case 1:
+            TRY(spi_passthru_demo(&ctx));
+            break;
           default:
             screen_println(&lcd, "Option not avail!", alined_center, 8, true);
             break;
@@ -136,6 +146,31 @@ static status_t aes_demo(context_t *ctx) {
 }
 
 static status_t spi_passthru_demo(context_t *ctx) {
+  static bool enabled = false;
+  lcd_st7735_clean(ctx->lcd);
+  if (!enabled) {
+    enabled = true;
+
+    screen_println(ctx->lcd, "Enabling passthru!", alined_center, 5, true);
+    TRY(dif_spi_device_set_passthrough_mode(ctx->spid, kDifToggleEnabled));
+    TRY(spi_device_testutils_configure_passthrough(
+        ctx->spid,
+        /*filters=*/0x00,
+        /*upload_write_commands=*/false));
+
+    TRY(dif_spi_host_output_set_enabled(ctx->spi_flash, true));
+  } else {
+    enabled = false;
+    screen_println(ctx->lcd, "Disabling passthru!", alined_center, 5, true);
+    TRY(dif_spi_device_set_passthrough_mode(ctx->spid, kDifToggleDisabled));
+    TRY(dif_spi_host_output_set_enabled(ctx->spi_flash, false));
+  }
+  timer_delay(3000);
+  lcd_st7735_clean(ctx->lcd);
+  return OK_STATUS();
+}
+
+static status_t notavail_demo(context_t *ctx) {
   lcd_st7735_clean(ctx->lcd);
   while (true) {
     screen_println(ctx->lcd, "Option not avail!", alined_center, 5, true);

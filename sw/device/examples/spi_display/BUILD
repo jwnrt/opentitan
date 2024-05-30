@@ -11,6 +11,7 @@ load(
     "EARLGREY_SILICON_OWNER_ROM_EXT_ENVS",
     "cw310_params",
     "opentitan_test",
+    "silicon_params",
 )
 
 package(default_visibility = ["//visibility:public"])
@@ -30,7 +31,10 @@ opentitan_test(
         EARLGREY_SILICON_OWNER_ROM_EXT_ENVS,
         {
             "//hw/top_earlgrey:fpga_cw340_test_rom": None,
-        }
+        },
+    ),
+    silicon = silicon_params(
+        interface = "ftdi",
     ),
     deps = [
         ":spi_display_app",
@@ -73,6 +77,7 @@ cc_library(
         "//sw/device/lib/dif:aes",
         "//sw/device/lib/dif:gpio",
         "//sw/device/lib/dif:pinmux",
+        "//sw/device/lib/dif:spi_device",
         "//sw/device/lib/dif:spi_host",
         "//sw/device/lib/dif:uart",
         "//sw/device/lib/runtime:hart",
@@ -81,6 +86,8 @@ cc_library(
         "//sw/device/lib/testing:aes_testutils",
         "//sw/device/lib/testing:pinmux_testutils",
         "//sw/device/lib/testing:profile",
+        "//sw/device/lib/testing:spi_device_testutils",
+        "//sw/device/lib/testing:spi_flash_testutils",
         "//sw/device/lib/testing/test_framework:check",
         "//sw/device/lib/testing/test_framework:ottf_main",
         "//sw/device/lib/testing/test_framework:ottf_start",
