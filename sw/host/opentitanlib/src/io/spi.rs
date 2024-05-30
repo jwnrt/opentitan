@@ -150,6 +150,7 @@ pub struct MaxSizes {
     pub write: usize,
 }
 
+#[derive(Debug)]
 /// Represents a SPI transfer.
 pub enum Transfer<'rd, 'wr> {
     Read(&'rd mut [u8]),

@@ -1,0 +1,82 @@
+{
+  "includes": ["/__builtin__/opentitan.json"],
+  "interface": "ftdi",
+  "pins": [
+    {
+      "name": "RESET",
+      "mode": "PushPull",
+      "invert": false,
+      "alias_of": "ddbus7",
+      "pull_mode": "None"
+    },
+    {
+      "name": "TRST",
+      "mode": "PushPull",
+      "level": true,
+      "alias_of": "ddbus6",
+      "pull_mode": "None"
+    },
+    {
+      "name": "IOC0",
+      "alias_of": "bdbus4"
+    },
+    {
+      "name": "IOC1",
+      "alias_of": "bdbus5"
+    },
+    {
+      "name": "IOC2",
+      "alias_of": "bdbus6"
+    },
+    {
+      "name": "IOC8",
+      "alias_of": "adbus7"
+    },
+    {
+      "name": "IOC5",
+      "alias_of": "adbus6"
+    },
+    {
+      "name": "MUX_FTDI",
+      "alias_of": "bdbus7"
+    }
+  ],
+  "spi": [
+    {
+      "name": "BOOTSTRAP"
+    }
+  ],
+  "uarts": [
+    {
+      "name": "console",
+      "alias_of": "2"
+    },
+    {
+      "name": "dut",
+      "alias_of": "1"
+    }
+  ],
+  "strappings": [
+    {
+      "name": "ROM_BOOTSTRAP",
+      "pins": [
+        {
+          "name": "SW_STRAP0",
+          "level": true
+        },
+        {
+          "name": "SW_STRAP1",
+          "level": true
+        },
+        {
+          "name": "SW_STRAP2",
+          "level": true
+        },
+        {
+          "name": "MUX_FTDI",
+          "level": true
+        }
+      ]
+    }
+  ]
+}
