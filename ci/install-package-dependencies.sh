@@ -21,9 +21,6 @@ error()
 long="verilator-version:,verible-version:"
 ARGS="$(getopt -o "" -l "$long" -- "$@")" || usage
 
-VERILATOR_VERSION=
-VERIBLE_VERSION=
-
 eval set -- "$ARGS"
 while :
 do

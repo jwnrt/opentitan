@@ -14,8 +14,8 @@ if [ $# != 1 ]; then
 fi
 tgt_branch="$1"
 
-merge_base="$(git merge-base origin/$tgt_branch HEAD)" || {
-    echo >&2 "Failed to find fork point for origin/$tgt_branch."
+merge_base="$(git merge-base $tgt_branch HEAD)" || {
+    echo >&2 "Failed to find fork point for $tgt_branch."
     exit 1
 }
 echo "Checking commit messages since $merge_base"
