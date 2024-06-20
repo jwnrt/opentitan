@@ -1,6 +1,6 @@
-[submodule "sw/device/examples/ctap/display_drivers"]
-	path = sw/device/examples/ctap/display_drivers
+[submodule "sw/device/examples/spi_display/display_drivers"]
+	path = sw/device/examples/spi_display/display_drivers
 	url = https://github.com/engdoreis/display_drivers
-[submodule "sw/device/examples/ctap/PNG-to-RGB565"]
-	path = sw/device/examples/ctap/PNG-to-RGB565
+[submodule "sw/device/examples/spi_display/PNG-to-RGB565"]
+	path = sw/device/examples/spi_display/PNG-to-RGB565
 	url = https://github.com/jimmywong2003/PNG-to-RGB565.git

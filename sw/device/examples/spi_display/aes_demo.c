@@ -43,22 +43,22 @@ status_t run_aes(context_t *app) {
   uint8_t *plain_image = (uint8_t *)tmux_80_95;
   int image_len = sizeof(tmux_80_95);
 
-  lcd_st7735_clean(app->lcd);
-  lcd_st7735_set_font_colors(app->lcd, BGRColorBlue, BGRColorWhite);
-  screen_println(app->lcd, "ECB      CBC", alined_center, 0, true);
-  lcd_st7735_set_font_colors(app->lcd, BGRColorWhite, BGRColorBlue);
+  lcd_st7735_clean(&app->lcd);
+  lcd_st7735_set_font_colors(&app->lcd, BGRColorBlue, BGRColorWhite);
+  screen_println(&app->lcd, "ECB      CBC", alined_center, 0, true);
+  lcd_st7735_set_font_colors(&app->lcd, BGRColorWhite, BGRColorBlue);
 
-  lcd_st7735_draw_rgb565(app->lcd, rectangle, plain_image);
+  lcd_st7735_draw_rgb565(&app->lcd, rectangle, plain_image);
   rectangle.origin.x = rectangle.width;
-  lcd_st7735_draw_rgb565(app->lcd, rectangle, plain_image);
+  lcd_st7735_draw_rgb565(&app->lcd, rectangle, plain_image);
 
-  screen_println(app->lcd, "Will encrypt the", alined_center, 8, true);
-  screen_println(app->lcd, "images with OT AES ", alined_center, 9, true);
+  screen_println(&app->lcd, "Will encrypt the", alined_center, 8, true);
+  screen_println(&app->lcd, "images with OT AES ", alined_center, 9, true);
 
   for (int i = 3; i >= 0; i--) {
     size_t len = base_snprintf(fmt_str, sizeof(fmt_str), "%u", i);
     fmt_str[len] = 0;
-    screen_println(app->lcd, fmt_str, alined_center, 3, false);
+    screen_println(&app->lcd, fmt_str, alined_center, 3, false);
     if (i > 0){
       busy_spin_micros(1000 * 1000);
     }
@@ -77,21 +77,21 @@ status_t run_aes(context_t *app) {
   uint64_t profile = profile_start();
 
   rectangle.origin.x = 0;
-  lcd_st7735_rgb565_start(app->lcd, rectangle);
+  lcd_st7735_rgb565_start(&app->lcd, rectangle);
   transaction.mode = kDifAesModeEcb;
-  TRY(dif_aes_start(app->aes, &transaction, &key, &iv));
+  TRY(dif_aes_start(&app->aes, &transaction, &key, &iv));
   TRY(encrypt_and_display(app, plain_image, image_len));
-  lcd_st7735_rgb565_finish(app->lcd);
-  TRY(dif_aes_end(app->aes));
+  lcd_st7735_rgb565_finish(&app->lcd);
+  TRY(dif_aes_end(&app->aes));
 
 
   rectangle.origin.x = rectangle.width;
-  lcd_st7735_rgb565_start(app->lcd, rectangle);
+  lcd_st7735_rgb565_start(&app->lcd, rectangle);
   transaction.mode = kDifAesModeCbc;
-  TRY(dif_aes_start(app->aes, &transaction, &key, &iv));
+  TRY(dif_aes_start(&app->aes, &transaction, &key, &iv));
   TRY(encrypt_and_display(app, plain_image, image_len));
-  lcd_st7735_rgb565_finish(app->lcd);
-  TRY(dif_aes_end(app->aes));
+  lcd_st7735_rgb565_finish(&app->lcd);
+  TRY(dif_aes_end(&app->aes));
 
   uint32_t cycles = profile_end(profile);
   uint32_t clock_mhz = (uint32_t)kClockFreqCpuHz / 1000000;
@@ -100,11 +100,11 @@ status_t run_aes(context_t *app) {
   size_t len = base_snprintf(fmt_str, sizeof(fmt_str), "Took ~%uM CPU cycles",
                              cycles / 1000000);
   fmt_str[len] = 0;
-  screen_println(app->lcd, fmt_str, alined_center, 8, true);
+  screen_println(&app->lcd, fmt_str, alined_center, 8, true);
   len = base_snprintf(fmt_str, sizeof(fmt_str), "or %u ms @ %u MHz",
                       time_micros / 1000, clock_mhz);
   fmt_str[len] = 0;
-  screen_println(app->lcd, fmt_str, alined_center, 9, true);
+  screen_println(&app->lcd, fmt_str, alined_center, 9, true);
 
   return OK_STATUS();
 }
@@ -112,22 +112,22 @@ status_t run_aes(context_t *app) {
 static status_t encrypt_and_display(context_t *app, uint8_t *plain_image, int image_len){
   dif_aes_data_t in_data_plain;
   memcpy(in_data_plain.data, plain_image, sizeof(in_data_plain.data));
-  TRY(dif_aes_load_data(app->aes, in_data_plain));
+  TRY(dif_aes_load_data(&app->aes, in_data_plain));
   do {
-    AES_TESTUTILS_WAIT_FOR_STATUS(app->aes, kDifAesStatusOutputValid, true,
+    AES_TESTUTILS_WAIT_FOR_STATUS(&app->aes, kDifAesStatusOutputValid, true,
                                   5000);
     dif_aes_data_t out_data;
-    TRY(dif_aes_read_output(app->aes, &out_data));
+    TRY(dif_aes_read_output(&app->aes, &out_data));
 
     plain_image += sizeof(kKeyShare1);
     image_len -= sizeof(kKeyShare1);
     memcpy(in_data_plain.data, plain_image, sizeof(in_data_plain.data));
     // Load the plain text to trigger the encryption operation.
-    AES_TESTUTILS_WAIT_FOR_STATUS(app->aes, kDifAesStatusInputReady, true,
+    AES_TESTUTILS_WAIT_FOR_STATUS(&app->aes, kDifAesStatusInputReady, true,
                                   5000);
-    TRY(dif_aes_load_data(app->aes, in_data_plain));
+    TRY(dif_aes_load_data(&app->aes, in_data_plain));
 
-    lcd_st7735_rgb565_put(app->lcd, (uint8_t *)&out_data.data,
+    lcd_st7735_rgb565_put(&app->lcd, (uint8_t *)&out_data.data,
                           sizeof(out_data.data));
   } while (image_len > 0);
   return OK_STATUS();

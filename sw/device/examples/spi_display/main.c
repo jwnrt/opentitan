@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "app.h"
+#include "context.h"
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/macros.h"
 #include "sw/device/lib/base/memory.h"
@@ -11,6 +12,7 @@
 #include "sw/device/lib/dif/dif_gpio.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_spi_host.h"
+#include "sw/device/lib/dif/dif_rv_plic.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/log.h"
 #include "sw/device/lib/testing/spi_device_testutils.h"
@@ -25,7 +27,9 @@
 
 OTTF_DEFINE_TEST_CONFIG();
 
-typedef struct Platform {
+context_t ctx;
+
+typedef struct platform {
   pinmux_testutils_mio_dict_t csb;
   pinmux_testutils_mio_dict_t sd0;
   pinmux_testutils_mio_dict_t clk;
@@ -39,9 +43,9 @@ typedef struct Platform {
   pinmux_testutils_mio_dict_t btn_ok;
   size_t spi_speed;
   LCD_Orientation orientation;
-} Platform_t;
+} platform_t;
 
-static const Platform_t kCw340Board = {
+static const platform_t kCw340Board = {
     .csb = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob6),
     .sd0 = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob0),
     .clk = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob1),
@@ -52,7 +56,7 @@ static const Platform_t kCw340Board = {
     .orientation = LCD_Rotate0,
 };
 
-static const Platform_t kBrewBoard = {
+static const platform_t kBrewBoard = {
     .csb = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob1),
     .sd0 = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob7),
     .clk = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob9),
@@ -63,7 +67,7 @@ static const Platform_t kBrewBoard = {
     .orientation = LCD_Rotate0,
 };
 
-static const Platform_t kVoyager1Board = {
+static const platform_t kVoyager1Board = {
     .csb = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc6),
     .sd0 = PINMUX_TESTUTILS_NEW_MIO_DICT(Ior2),
     .clk = PINMUX_TESTUTILS_NEW_MIO_DICT(Ior3),
@@ -79,7 +83,7 @@ static const Platform_t kVoyager1Board = {
     .orientation = LCD_Rotate180,
 };
 
-static status_t pinmux_select(const dif_pinmux_t *pinmux, Platform_t pinmap) {
+static status_t pinmux_select(const dif_pinmux_t *pinmux, platform_t pinmap) {
   // CSB.
   TRY(dif_pinmux_output_select(pinmux, pinmap.csb.out,
                                kTopEarlgreyPinmuxOutselSpiHost1Csb));
@@ -135,9 +139,7 @@ static status_t pinmux_select(const dif_pinmux_t *pinmux, Platform_t pinmap) {
 }
 
 bool test_main(void) {
-  dif_spi_host_t spi_lcd;
-  dif_spi_host_t spi_flash;
-  const volatile Platform_t *config = NULL;
+  const volatile platform_t *config = NULL;
   switch (kDeviceType) {
     case kDeviceFpgaCw340:
       LOG_INFO("FPGA CW340 detected!");
@@ -149,7 +151,7 @@ bool test_main(void) {
       config = &kVoyager1Board;
       break;
     default:
-      CHECK(false, "Platform not supported");
+      CHECK(false, "platform not supported");
   }
 
   dif_pinmux_t pinmux;
@@ -158,20 +160,20 @@ bool test_main(void) {
   pinmux_select(&pinmux, *config);
 
   addr = mmio_region_from_addr(TOP_EARLGREY_SPI_HOST1_BASE_ADDR);
-  CHECK_DIF_OK(dif_spi_host_init(addr, &spi_lcd));
+  CHECK_DIF_OK(dif_spi_host_init(addr, &ctx.spi_lcd));
   CHECK_DIF_OK(dif_spi_host_configure(
-                   &spi_lcd,
+                   &ctx.spi_lcd,
                    (dif_spi_host_config_t){
                        .spi_clock = config->spi_speed,
                        .peripheral_clock_freq_hz = (uint32_t)kClockFreqUsbHz,
                    }),
                "SPI_HOST 1 config failed!");
-  CHECK_DIF_OK(dif_spi_host_output_set_enabled(&spi_lcd, true));
+  CHECK_DIF_OK(dif_spi_host_output_set_enabled(&ctx.spi_lcd, true));
 
   addr = mmio_region_from_addr(TOP_EARLGREY_SPI_HOST0_BASE_ADDR);
-  CHECK_DIF_OK(dif_spi_host_init(addr, &spi_flash));
+  CHECK_DIF_OK(dif_spi_host_init(addr, &ctx.spi_flash));
   CHECK_DIF_OK(
-      dif_spi_host_configure(&spi_flash,
+      dif_spi_host_configure(&ctx.spi_flash,
                              (dif_spi_host_config_t){
                                  .spi_clock = config->spi_speed,
                                  .peripheral_clock_freq_hz =
@@ -180,23 +182,31 @@ bool test_main(void) {
       "SPI_HOST0 config failed!");
 
 
-  dif_spi_device_handle_t spid;
   addr = mmio_region_from_addr(TOP_EARLGREY_SPI_DEVICE_BASE_ADDR);
-  CHECK_DIF_OK(dif_spi_device_init_handle(addr, &spid));
+  CHECK_DIF_OK(dif_spi_device_init_handle(addr, &ctx.spid));
 
   addr = mmio_region_from_addr(TOP_EARLGREY_GPIO_BASE_ADDR);
-  dif_gpio_t gpio;
-  CHECK_DIF_OK(dif_gpio_init(addr, &gpio));
-  CHECK_DIF_OK(dif_gpio_output_set_enabled_all(&gpio, 0xf));
+  CHECK_DIF_OK(dif_gpio_init(addr, &ctx.gpio));
+  CHECK_DIF_OK(dif_gpio_output_set_enabled_all(&ctx.gpio, 0xf));
 
   addr = mmio_region_from_addr(TOP_EARLGREY_AES_BASE_ADDR);
-  dif_aes_t aes;
-  CHECK_DIF_OK(dif_aes_init(addr, &aes));
-  CHECK_DIF_OK(dif_aes_reset(&aes));
+  CHECK_DIF_OK(dif_aes_init(addr, &ctx.aes));
+  CHECK_DIF_OK(dif_aes_reset(&ctx.aes));
 
-  run_demo(&spi_lcd, &spi_flash, &spid, &gpio, &aes,
-           (display_pin_map_t){0, 1, 2, 11, 4, 5, 6, 7, 8},
-           config->orientation);
+  addr = mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR);
+  CHECK_DIF_OK(dif_rv_plic_init(addr, &ctx.rv_plic));
+
+  ctx.pins.reset.idx = 0;
+  ctx.pins.dc.idx = 1;
+  ctx.pins.led.idx = 2;
+  ctx.pins.cs.idx = 11;
+  ctx.pins.btn_up.idx = 4;
+  ctx.pins.btn_down.idx = 5;
+  ctx.pins.btn_left.idx = 6;
+  ctx.pins.btn_right.idx = 7;
+  ctx.pins.btn_ok.idx = 8;
+
+  run_demo(config->orientation);
 
   return true;
 }
