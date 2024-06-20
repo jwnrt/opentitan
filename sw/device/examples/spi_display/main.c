@@ -74,7 +74,7 @@ static const Platform_t kVoyager1Board = {
     .btn_down = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc11),
     .btn_left = PINMUX_TESTUTILS_NEW_MIO_DICT(Ioc12),
     .btn_right = PINMUX_TESTUTILS_NEW_MIO_DICT(Ior0),
-    .btn_ok = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob1),
+    .btn_ok = PINMUX_TESTUTILS_NEW_MIO_DICT(Iob2),
     .spi_speed = 22000000,  // 22Mhz
     .orientation = LCD_Rotate180,
 };
