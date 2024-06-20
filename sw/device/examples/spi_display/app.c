@@ -149,16 +149,10 @@ status_t run_demo(LCD_Orientation orientation) {
 
 static status_t aes_demo(void) {
   TRY(run_aes(&ctx));
+
   timer_delay(5000);
-
   lcd_st7735_clean(&ctx.lcd);
-  lcd_st7735_draw_rgb565(
-      &ctx.lcd,
-      (LCD_rectangle){.origin = {.x = 0, .y = 12}, .width = 160, .height = 100},
-      (uint8_t *)ot_stronks_160_100);
 
-  timer_delay(3000);
-  lcd_st7735_clean(&ctx.lcd);
   return OK_STATUS();
 }
 
