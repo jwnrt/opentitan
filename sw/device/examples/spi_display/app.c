@@ -5,6 +5,7 @@
 #include "app.h"
 
 #include "demos.h"
+#include "ctap.h"
 #include "context.h"
 #include "display_drivers/core/lucida_console_10pt.h"
 #include "display_drivers/st7735/lcd_st7735.h"
@@ -24,7 +25,7 @@
 #include "sw/device/lib/base/memory.h"
 
 enum {
-  kBtnDebounceMillis = 50,
+  kBtnDebounceMicros = 5 * 1000,
 };
 
 // Local functions declaration.
@@ -32,10 +33,14 @@ static uint32_t spi_write(void *handle, uint8_t *data, size_t len);
 static uint32_t gpio_write(void *handle, bool cs, bool dc);
 static void timer_delay(uint32_t ms);
 static status_t config_interrupts(void);
+static status_t read_buttons(void);
+static status_t ctap_demo(void);
 static status_t aes_demo(void);
 static status_t spi_passthru_demo(void);
 
 extern context_t ctx;
+
+static volatile uint64_t last_change_time = 0;
 
 status_t run_demo(LCD_Orientation orientation) {
   LOG_INFO("%s: Initializing pins", __func__);
@@ -105,31 +110,31 @@ status_t run_demo(LCD_Orientation orientation) {
 
   lcd_st7735_clean(&ctx.lcd);
 
-  screen_show_menu(&ctx.lcd, &main_menu, 0);
-
-  display_pin_map_t old_state = ctx.pins;
-
+  size_t selected = 0;
   while (true) {
+    screen_show_menu(&ctx.lcd, &main_menu, selected);
+
     irq_global_ctrl(true);
     wait_for_interrupt();
 
-    while (memcmp(&ctx.pins, &old_state, sizeof(display_pin_map_t))) {
-      old_state = ctx.pins;
-      timer_delay(kBtnDebounceMillis);
-    }
-
-    irq_global_ctrl(false);
-
-    pin_t pins[] = {ctx.pins.btn_up, ctx.pins.btn_down, ctx.pins.btn_left, ctx.pins.btn_right};
-    size_t selected = 0;
-    for (size_t i = 0; i < ARRAYSIZE(pins); i++) {
-      if (pins[i].state) {
-        selected = i;
+    while (true) {
+      uint64_t delta_t = ibex_mcycle_read() - last_change_time;
+      uint64_t cycles = to_cpu_cycles(kBtnDebounceMicros);
+      if (delta_t > cycles) {
         break;
       }
     }
 
-    screen_show_menu(&ctx.lcd, &main_menu, selected);
+    irq_global_ctrl(false);
+    read_buttons();
+
+    pin_t volatile* pins[] = {&ctx.pins.btn_up, &ctx.pins.btn_down, &ctx.pins.btn_left, &ctx.pins.btn_right};
+    for (size_t i = 0; i < ARRAYSIZE(pins); i++) {
+      if (pins[i]->state) {
+        selected = i;
+        break;
+      }
+    }
 
     if (ctx.pins.btn_ok.state) {
       switch (selected) {
@@ -138,6 +143,9 @@ status_t run_demo(LCD_Orientation orientation) {
           break;
         case 1:
           TRY(spi_passthru_demo());
+          break;
+        case 2:
+          TRY(ctap_demo());
           break;
         default:
           screen_println(&ctx.lcd, "Option not avail!", alined_center, 8, true);
@@ -181,6 +189,12 @@ static status_t spi_passthru_demo(void) {
   return OK_STATUS();
 }
 
+static status_t ctap_demo(void) {
+  run_ctap(&ctx);
+
+  return OK_STATUS();
+}
+
 status_t config_interrupts(void) {
   uint32_t button_mask =
     (1 << ctx.pins.btn_up.idx) |
@@ -214,15 +228,7 @@ void ottf_external_isr(uint32_t *exc_info) {
   // Correlate the interrupt fired from GPIO.
   uint32_t gpio_pin_irq_fired = plic_irq_id - kTopEarlgreyPlicIrqIdGpioGpio0;
 
-  dif_gpio_state_t gpio_state;
-  CHECK_DIF_OK(dif_gpio_read_all(&ctx.gpio, &gpio_state));
-
-  pin_t* pins[] = {&ctx.pins.btn_up, &ctx.pins.btn_down,
-                  &ctx.pins.btn_left, &ctx.pins.btn_right,
-                  &ctx.pins.btn_ok};
-  for (int i = 0; i < ARRAYSIZE(pins); i++) {
-    pins[i]->state = !((gpio_state >> pins[i]->idx) & 1);
-  }
+  last_change_time = ibex_mcycle_read();
 
   // Clear the interrupt at GPIO.
   CHECK_DIF_OK(dif_gpio_irq_acknowledge(&ctx.gpio, gpio_pin_irq_fired));
@@ -230,6 +236,21 @@ void ottf_external_isr(uint32_t *exc_info) {
   // Complete the IRQ at PLIC.
   CHECK_DIF_OK(dif_rv_plic_irq_complete(&ctx.rv_plic, kTopEarlgreyPlicTargetIbex0,
                                         plic_irq_id));
+}
+
+static status_t read_buttons(void) {
+  dif_gpio_state_t gpio_state;
+  TRY(dif_gpio_read_all(&ctx.gpio, &gpio_state));
+
+  pin_t* pins[] = {&ctx.pins.btn_up, &ctx.pins.btn_down,
+                  &ctx.pins.btn_left, &ctx.pins.btn_right,
+                  &ctx.pins.btn_ok};
+  for (int i = 0; i < ARRAYSIZE(pins); i++) {
+    pins[i]->state = !((gpio_state >> pins[i]->idx) & 1);
+  }
+  LOG_INFO("%b", gpio_state);
+
+  return OK_STATUS();
 }
 
 static uint32_t spi_write(void *handle, uint8_t *data, size_t len) {

@@ -46,12 +46,14 @@ cc_library(
     name = "spi_display_app",
     srcs = [
         "aes_demo.c",
+        "ctap.c",
         "app.c",
         "screen.c",
     ],
     hdrs = [
         "app.h",
         "context.h",
+        "ctap.h",
         "demos.h",
         "screen.h",
     ],
