@@ -57,7 +57,7 @@ cc_library(
     ],
     deps = [
         ":spi_display_lib",
-        "//sw/device/examples/spi_display/display_drivers:spi_display_driver_lib",
+        ":spi_display_driver_lib",
         "//sw/device/examples/spi_display/images:logo_ibex",
         "//sw/device/examples/spi_display/images:logo_lowrisc_05_80px",
         "//sw/device/examples/spi_display/images:logo_opentitan_160_39px",
@@ -92,5 +92,22 @@ cc_library(
         "//sw/device/lib/testing/test_framework:ottf_main",
         "//sw/device/lib/testing/test_framework:ottf_start",
         "//sw/device/lib/testing/test_framework:ottf_test_config",
+    ],
+)
+cc_library(
+    name = "spi_display_driver_lib",
+    srcs = [
+        "display_drivers/core/lcd_base.c",
+        "display_drivers/core/lucida_console_10pt.c",
+        "display_drivers/st7735/lcd_st7735.c",
+    ],
+    hdrs = [
+        "display_drivers/core/font.h",
+        "display_drivers/core/lcd_base.h",
+        "display_drivers/core/lucida_console_10pt.h",
+        "display_drivers/core/lucida_console_12pt.h",
+        "display_drivers/st7735/lcd_st7735.h",
+        "display_drivers/st7735/lcd_st7735_cmds.h",
+        "display_drivers/st7735/lcd_st7735_init.h",
     ],
 )
