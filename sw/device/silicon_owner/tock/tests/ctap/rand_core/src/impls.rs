@@ -19,7 +19,7 @@
 
 use crate::RngCore;
 use core::cmp::min;
-use zerocopy::AsBytes;
+use zerocopy::{Immutable, IntoBytes};
 
 /// Implement `next_u64` via `next_u32`, little-endian order.
 pub fn next_u64_via_u32<R: RngCore + ?Sized>(rng: &mut R) -> u64 {
@@ -53,7 +53,7 @@ pub fn fill_bytes_via_next<R: RngCore + ?Sized>(rng: &mut R, dest: &mut [u8]) {
     }
 }
 
-trait Observable: AsBytes + Copy {
+trait Observable: IntoBytes + Copy {
     fn to_le(self) -> Self;
 }
 impl Observable for u32 {
@@ -72,7 +72,7 @@ impl Observable for u64 {
 /// Returns `(n, byte_len)`. `src[..n]` is consumed (and possibly mutated),
 /// `dest[..byte_len]` is filled. `src[n..]` and `dest[byte_len..]` are left
 /// unaltered.
-fn fill_via_chunks<T: Observable>(src: &mut [T], dest: &mut [u8]) -> (usize, usize) {
+fn fill_via_chunks<T: Observable + Immutable>(src: &mut [T], dest: &mut [u8]) -> (usize, usize) {
     let size = core::mem::size_of::<T>();
     let byte_len = min(core::mem::size_of_val(src), dest.len());
     let num_chunks = (byte_len + size - 1) / size;

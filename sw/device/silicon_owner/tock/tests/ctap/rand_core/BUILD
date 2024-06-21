@@ -17,6 +17,6 @@ rust_library(
         "src/os.rs",
     ],
     deps = [
-        "@crate_index//:zerocopy",
+        "//sw/device/silicon_owner/tock/tests/ctap/zerocopy",
     ],
 )
