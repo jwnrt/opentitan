@@ -69,7 +69,7 @@ rust_library(
         "@crate_index//:zeroize",
     ],
     aliases = {
-        "//sw/device/silicon_owner/tock/tests/ctap/cbor": "sk-cbor",
+        "//sw/device/silicon_owner/tock/tests/ctap/cbor": "sk_cbor",
     },
     target_compatible_with = [OPENTITAN_CPU],
 )
