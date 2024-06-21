@@ -172,6 +172,11 @@ struct EarlGrey {
         VirtualMuxAlarm<'static, earlgrey::timer::RvTimer<'static, ChipConfig>>,
     >,
     watchdog: &'static lowrisc::aon_timer::AonTimer,
+    _ctap: &'static capsules_extra::usb::ctap::CtapHid<'static, earlgrey::usbdev::Usb<'static>>,
+    ctap_driver: &'static capsules_extra::usb_hid_driver::UsbHidDriver<
+        'static,
+        capsules_extra::usb::ctap::CtapHid<'static, earlgrey::usbdev::Usb<'static>>,
+    >,
 }
 
 /// Mapping of integer syscalls to objects that implement syscalls.
@@ -191,6 +196,7 @@ impl SyscallDriverLookup for EarlGrey {
             capsules_core::spi_controller::DRIVER_NUM => f(Some(self.spi_controller)),
             capsules_core::rng::DRIVER_NUM => f(Some(self.rng)),
             capsules_extra::symmetric_encryption::aes::DRIVER_NUM => f(Some(self.aes)),
+            0x40004 => f(Some(self.ctap_driver)),
             _ => f(None),
         }
     }
@@ -463,6 +469,24 @@ unsafe fn setup() -> (
     // )
     // .finalize(components::usb_component_static!(earlgrey::usbdev::Usb));
 
+    const STRINGS: [&str; 3] = [
+        "lowRISC CIC", // Manufacturer
+        "lowKEY",      // Product
+        "1111",        // Serial number
+    ];
+
+    let (ctap, ctap_driver) = components::ctap::CtapComponent::new(
+        board_kernel,
+        0x40004,
+        &peripherals.usb,
+        0x2B3E, // NewAE USB ID
+        0x1111, // lowRISC generic FS USB
+        &STRINGS,
+    )
+    .finalize(components::ctap_component_static!(
+        earlgrey::usbdev::Usb<'static>
+    ));
+
     // Kernel storage region, allocated with the storage_volume!
     // macro in common/utils.rs
     extern "C" {
@@ -636,6 +660,8 @@ unsafe fn setup() -> (
             scheduler,
             scheduler_timer,
             watchdog,
+            _ctap: ctap,
+            ctap_driver,
         }
     );
 
