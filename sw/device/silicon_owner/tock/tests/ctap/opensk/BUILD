@@ -63,9 +63,9 @@ rust_library(
         "//sw/device/silicon_owner/tock/tests/ctap/crypto",
         "//sw/device/silicon_owner/tock/tests/ctap/persistent_store",
         "//sw/device/silicon_owner/tock/tests/ctap/byteorder",
+        "//sw/device/silicon_owner/tock/tests/ctap/rand_core",
         "@crate_index//:arrayref",
         "@crate_index//:subtle",
-        "@crate_index//:rand_core",
         "@crate_index//:zeroize",
     ],
     aliases = {

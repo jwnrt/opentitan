@@ -29,8 +29,8 @@ rust_library(
     deps = [
         "@crate_index//:arrayref",
         "@crate_index//:subtle",
-        "@crate_index//:rand_core",
         "@crate_index//:zeroize",
+        "//sw/device/silicon_owner/tock/tests/ctap/rand_core",
         "//sw/device/silicon_owner/tock/tests/ctap/byteorder",
     ],
 )
