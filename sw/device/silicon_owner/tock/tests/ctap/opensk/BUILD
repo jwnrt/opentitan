@@ -5,6 +5,8 @@
 load("@rules_rust//rust:defs.bzl", "rust_library")
 load("//rules/opentitan:defs.bzl", "OPENTITAN_CPU")
 
+package(default_visibility = ["//visibility:public"])
+
 rust_library(
     name = "opensk",
     srcs = [
