@@ -62,7 +62,7 @@ rust_library(
         "//sw/device/silicon_owner/tock/tests/ctap/cbor",
         "//sw/device/silicon_owner/tock/tests/ctap/crypto",
         "//sw/device/silicon_owner/tock/tests/ctap/persistent_store",
-        "@crate_index//:byteorder",
+        "//sw/device/silicon_owner/tock/tests/ctap/byteorder",
         "@crate_index//:arrayref",
         "@crate_index//:subtle",
         "@crate_index//:rand_core",
