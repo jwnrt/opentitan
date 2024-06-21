@@ -330,6 +330,7 @@ _NORMAL_DEPENDENCIES = {
             "indexmap": "@crate_index__indexmap-2.0.0//:indexmap",
             "indicatif": "@crate_index__indicatif-0.17.6//:indicatif",
             "libftdi1-sys": "@crate_index__libftdi1-sys-1.1.2//:libftdi1_sys",
+            "linked_list_allocator": "@crate_index__linked_list_allocator-0.10.5//:linked_list_allocator",
             "log": "@crate_index__log-0.4.20//:log",
             "mdbook": "@crate_index__mdbook-0.4.34//:mdbook",
             "memchr": "@crate_index__memchr-2.6.4//:memchr",
@@ -1852,6 +1853,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/libusb1-sys/0.6.4/download"],
         strip_prefix = "libusb1-sys-0.6.4",
         build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.libusb1-sys-0.6.4.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__linked_list_allocator-0.10.5",
+        sha256 = "9afa463f5405ee81cdb9cc2baf37e08ec7e4c8209442b5d72c04cfb2cd6e6286",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/linked_list_allocator/0.10.5/download"],
+        strip_prefix = "linked_list_allocator-0.10.5",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.linked_list_allocator-0.10.5.bazel"),
     )
 
     maybe(

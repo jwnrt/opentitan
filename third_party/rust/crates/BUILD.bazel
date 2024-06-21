@@ -248,6 +248,12 @@ alias(
 )
 
 alias(
+    name = "linked_list_allocator",
+    actual = "@crate_index__linked_list_allocator-0.10.5//:linked_list_allocator",
+    tags = ["manual"],
+)
+
+alias(
     name = "log",
     actual = "@crate_index__log-0.4.20//:log",
     tags = ["manual"],
