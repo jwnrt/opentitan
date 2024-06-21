@@ -378,7 +378,6 @@ _NORMAL_DEPENDENCIES = {
             "tempfile": "@crate_index__tempfile-3.8.0//:tempfile",
             "thiserror": "@crate_index__thiserror-1.0.49//:thiserror",
             "typetag": "@crate_index__typetag-0.2.13//:typetag",
-            "untrusted": "@crate_index__untrusted-0.7.1//:untrusted",
             "zerocopy": "@crate_index__zerocopy-0.7.11//:zerocopy",
             "zeroize": "@crate_index__zeroize-1.7.0//:zeroize",
         },

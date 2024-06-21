@@ -29,12 +29,6 @@ rust_library(
     deps = [
         "@crate_index//:arrayref",
         "@crate_index//:subtle",
-        "@crate_index//:hex",
-        "@crate_index//:ring",
-        "@crate_index//:untrusted",
-        "@crate_index//:serde",
-        "@crate_index//:serde_json",
-        "@crate_index//:regex",
         "@crate_index//:rand_core",
         "@crate_index//:zeroize",
         "//sw/device/silicon_owner/tock/tests/ctap/byteorder",

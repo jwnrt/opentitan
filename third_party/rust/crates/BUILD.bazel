@@ -542,12 +542,6 @@ alias(
 )
 
 alias(
-    name = "untrusted",
-    actual = "@crate_index__untrusted-0.7.1//:untrusted",
-    tags = ["manual"],
-)
-
-alias(
     name = "zerocopy",
     actual = "@crate_index__zerocopy-0.7.11//:zerocopy",
     tags = ["manual"],
