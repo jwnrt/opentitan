@@ -122,6 +122,7 @@ arrayref = "0.3.6"
 subtle = { version = "2.2.3", default-features = false, features = ["nightly"] }
 zeroize = { version = "1.5.7", features = ["derive"] }
 linked_list_allocator = { version = "0.10.4", default-features = false, features = ["const_mut_refs"] }
+uuid = { version = "0.8", features = ["v4"] }
 
 [dev-dependencies]
 base64ct = "1.6.0"

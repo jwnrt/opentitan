@@ -378,6 +378,7 @@ _NORMAL_DEPENDENCIES = {
             "tempfile": "@crate_index__tempfile-3.8.0//:tempfile",
             "thiserror": "@crate_index__thiserror-1.0.49//:thiserror",
             "typetag": "@crate_index__typetag-0.2.13//:typetag",
+            "uuid": "@crate_index__uuid-0.8.2//:uuid",
             "zerocopy": "@crate_index__zerocopy-0.7.11//:zerocopy",
             "zeroize": "@crate_index__zeroize-1.7.0//:zeroize",
         },
@@ -3415,6 +3416,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/utf8parse/0.2.1/download"],
         strip_prefix = "utf8parse-0.2.1",
         build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.utf8parse-0.2.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__uuid-0.8.2",
+        sha256 = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/uuid/0.8.2/download"],
+        strip_prefix = "uuid-0.8.2",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.uuid-0.8.2.bazel"),
     )
 
     maybe(
