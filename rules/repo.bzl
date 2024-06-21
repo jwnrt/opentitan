@@ -55,6 +55,9 @@ def _bare_repository_impl(rctx):
     for rpath, content in rctx.attr.additional_files_content.items():
         rctx.file(rpath, content)
 
+    for patch in rctx.attr.patches:
+        rctx.patch(patch)
+
 bare_repository = repository_rule(
     implementation = _bare_repository_impl,
     attrs = {
@@ -83,6 +86,7 @@ bare_repository = repository_rule(
             allow_single_file = True,
             doc = "Root workspace.",
         ),
+        "patches": attr.label_list(),
     },
     doc = """
         A bare_repository is a repo that needs additional files (such as a BUILD hierarchy)
