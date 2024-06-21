@@ -42,6 +42,7 @@ def tock_repos(tock = None, libtock = None, elf2tab = None):
         local = tock,
         strip_prefix = "tock-5a65d681489d30a4b88b5d1a7d2a0e8273cbf027",
         url = "https://github.com/tock/tock/archive/5a65d681489d30a4b88b5d1a7d2a0e8273cbf027.tar.gz",
+        patches = [Label("//third_party/tock:tock_usb_ctap.patch")],
         sha256 = "38f3efcaaa6c4e22a7c4fa8f2befa651ec1a9f730089434696ad781f6b479c79",
         additional_files_content = {
             "BUILD": """exports_files(glob(["**"]))""",
