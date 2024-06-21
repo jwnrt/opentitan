@@ -117,6 +117,13 @@ elf = "0.7.1"
 ring = "0.16.20"
 rsa-der = "0.3.0"
 
+# OpenSK dependencies
+arrayref = "0.3.6"
+subtle = { version = "2.2.3", default-features = false, features = ["nightly"] }
+untrusted = { version = "0.7.0" }
+rand_core = "0.6.4"
+zeroize = { version = "1.5.7", features = ["derive"] }
+
 [dev-dependencies]
 base64ct = "1.6.0"
 indoc = "2.0.4"

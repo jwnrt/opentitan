@@ -44,6 +44,12 @@ alias(
 )
 
 alias(
+    name = "arrayref",
+    actual = "@crate_index__arrayref-0.3.7//:arrayref",
+    tags = ["manual"],
+)
+
+alias(
     name = "arrayvec",
     actual = "@crate_index__arrayvec-0.7.4//:arrayvec",
     tags = ["manual"],
@@ -386,6 +392,12 @@ alias(
 )
 
 alias(
+    name = "rand_core",
+    actual = "@crate_index__rand_core-0.6.4//:rand_core",
+    tags = ["manual"],
+)
+
+alias(
     name = "regex",
     actual = "@crate_index__regex-1.9.4//:regex",
     tags = ["manual"],
@@ -494,6 +506,12 @@ alias(
 )
 
 alias(
+    name = "subtle",
+    actual = "@crate_index__subtle-2.5.0//:subtle",
+    tags = ["manual"],
+)
+
+alias(
     name = "syn",
     actual = "@crate_index__syn-2.0.38//:syn",
     tags = ["manual"],
@@ -524,8 +542,20 @@ alias(
 )
 
 alias(
+    name = "untrusted",
+    actual = "@crate_index__untrusted-0.7.1//:untrusted",
+    tags = ["manual"],
+)
+
+alias(
     name = "zerocopy",
     actual = "@crate_index__zerocopy-0.7.11//:zerocopy",
+    tags = ["manual"],
+)
+
+alias(
+    name = "zeroize",
+    actual = "@crate_index__zeroize-1.7.0//:zeroize",
     tags = ["manual"],
 )
 

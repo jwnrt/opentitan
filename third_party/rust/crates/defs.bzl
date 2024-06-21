@@ -298,6 +298,7 @@ _NORMAL_DEPENDENCIES = {
             "aes": "@crate_index__aes-0.8.3//:aes",
             "anstyle": "@crate_index__anstyle-1.0.4//:anstyle",
             "anyhow": "@crate_index__anyhow-1.0.75//:anyhow",
+            "arrayref": "@crate_index__arrayref-0.3.7//:arrayref",
             "arrayvec": "@crate_index__arrayvec-0.7.4//:arrayvec",
             "asn1": "@crate_index__asn1-0.15.5//:asn1",
             "bitflags": "@crate_index__bitflags-2.4.0//:bitflags",
@@ -352,6 +353,7 @@ _NORMAL_DEPENDENCIES = {
             "quote": "@crate_index__quote-1.0.33//:quote",
             "rand": "@crate_index__rand-0.8.5//:rand",
             "rand_chacha": "@crate_index__rand_chacha-0.3.1//:rand_chacha",
+            "rand_core": "@crate_index__rand_core-0.6.4//:rand_core",
             "regex": "@crate_index__regex-1.9.4//:regex",
             "ring": "@crate_index__ring-0.16.20//:ring",
             "rsa": "@crate_index__rsa-0.9.2//:rsa",
@@ -370,12 +372,15 @@ _NORMAL_DEPENDENCIES = {
             "sha3": "@crate_index__sha3-0.10.8//:sha3",
             "shellwords": "@crate_index__shellwords-1.1.0//:shellwords",
             "strum": "@crate_index__strum-0.25.0//:strum",
+            "subtle": "@crate_index__subtle-2.5.0//:subtle",
             "syn": "@crate_index__syn-2.0.38//:syn",
             "tar": "@crate_index__tar-0.4.40//:tar",
             "tempfile": "@crate_index__tempfile-3.8.0//:tempfile",
             "thiserror": "@crate_index__thiserror-1.0.49//:thiserror",
             "typetag": "@crate_index__typetag-0.2.13//:typetag",
+            "untrusted": "@crate_index__untrusted-0.7.1//:untrusted",
             "zerocopy": "@crate_index__zerocopy-0.7.11//:zerocopy",
+            "zeroize": "@crate_index__zeroize-1.7.0//:zeroize",
         },
     },
 }
@@ -687,6 +692,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/anyhow/1.0.75/download"],
         strip_prefix = "anyhow-1.0.75",
         build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.anyhow-1.0.75.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__arrayref-0.3.7",
+        sha256 = "6b4930d2cb77ce62f89ee5d5289b4ac049559b1c45539271f5ed4fdc7db34545",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/arrayref/0.3.7/download"],
+        strip_prefix = "arrayref-0.3.7",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.arrayref-0.3.7.bazel"),
     )
 
     maybe(
@@ -3791,4 +3806,14 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/zeroize/1.7.0/download"],
         strip_prefix = "zeroize-1.7.0",
         build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.zeroize-1.7.0.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "crate_index__zeroize_derive-1.4.2",
+        sha256 = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/zeroize_derive/1.4.2/download"],
+        strip_prefix = "zeroize_derive-1.4.2",
+        build_file = Label("@lowrisc_opentitan//third_party/rust/crates:BUILD.zeroize_derive-1.4.2.bazel"),
     )

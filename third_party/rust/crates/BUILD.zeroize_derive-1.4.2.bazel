@@ -6,7 +6,7 @@
 #     bazel run @//third_party/rust:crate_index
 ###############################################################################
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_proc_macro")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,8 +14,8 @@ package(default_visibility = ["//visibility:public"])
 #     "TODO",  # Apache-2.0 OR MIT
 # ])
 
-rust_library(
-    name = "zeroize",
+rust_proc_macro(
+    name = "zeroize_derive",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -28,21 +28,12 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
-    crate_features = [
-        "alloc",
-        "default",
-        "derive",
-        "zeroize_derive",
-    ],
     crate_root = "src/lib.rs",
     edition = "2021",
-    proc_macro_deps = [
-        "@crate_index__zeroize_derive-1.4.2//:zeroize_derive",
-    ],
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
-        "crate-name=zeroize",
+        "crate-name=zeroize_derive",
         "manual",
         "noclippy",
         "norustfmt",
@@ -81,5 +72,10 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.7.0",
+    version = "1.4.2",
+    deps = [
+        "@crate_index__proc-macro2-1.0.69//:proc_macro2",
+        "@crate_index__quote-1.0.33//:quote",
+        "@crate_index__syn-2.0.38//:syn",
+    ],
 )
