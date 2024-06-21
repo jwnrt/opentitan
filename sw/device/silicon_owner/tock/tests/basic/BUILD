@@ -42,7 +42,7 @@ tock_image(
 tock_image(
     name = "image_silicon",
     apps = [":tab"],
-    exec_env = "//hw/top_earlgrey:silicon_owner_sival_rom_ext",
+    exec_env = "//hw/top_earlgrey:silicon_owner_proda_rom_ext",
     kernel = "//sw/device/silicon_owner/tock/tests:test_kernel_silicon",
 )
 
@@ -54,5 +54,6 @@ opentitan_test(
     ),
     silicon = silicon_params(
         binaries = {":image_silicon": "firmware"},
+        interface = "ftdi",
     ),
 )
