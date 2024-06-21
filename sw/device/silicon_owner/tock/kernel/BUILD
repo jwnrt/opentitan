@@ -79,6 +79,7 @@ rust_binary(
     crate_features = ["silicon"],
     rustc_flags = [
         "-g",
+        "-Zmacro-backtrace",
         # TODO(opentitan#19491): determine the appropriate set of linker flags.
         #"-Clinker=rust-lld",
         #"-Clinker-flavor=ld.lld",
