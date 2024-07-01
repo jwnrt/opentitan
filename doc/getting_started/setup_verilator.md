@@ -4,39 +4,34 @@ _Before following this guide, make sure you've followed the [dependency installa
 
 ## About Verilator
 
-Verilator is a cycle-accurate simulation tool.
-It translates synthesizable Verilog code into a simulation program in C++, which is then compiled and executed.
+[Verilator][] is an open source cycle-accurate simulation tool.
+It supports synthesizable Verilog and SystemVerilog code.
+The Verilator tool outputs a C++ simulation program which can be compiled and executed.
 
 ### Install Verilator
 
-Even though Verilator is packaged for most Linux distributions, these versions tend to be too old to be usable.
-We recommend compiling Verilator from source, as outlined here.
+OpenTitan uses version {{#tool-version verilator}} of Verilator.
+We recommend compiling Verilator from source to ensure you're using the right version.
 
-Fetch, build and install Verilator itself (this should be done outside the `$REPO_TOP` directory).
-Note that Verilator 4.210 will not build with GCC 12.0 or later, so it will need to be built with an older toolchain.
-The example below assumes gcc-11 and g++-11 are installed on the system.
+Please note that this version of Verilator does not compile with GCC 12.0 or later.
 
-```console
+The following script will checkout, build, and install Verilator:
+
+```sh
 export VERILATOR_VERSION={{#tool-version verilator }}
 
 git clone https://github.com/verilator/verilator.git
 cd verilator
-git checkout v$VERILATOR_VERSION
+git checkout "v${VERILATOR_VERSION}"
 
 autoconf
-CC=gcc-11 CXX=g++-11 ./configure --prefix=/tools/verilator/$VERILATOR_VERSION
-CC=gcc-11 CXX=g++-11 make
-sudo CC=gcc-11 CXX=g++-11 make install
-```
-The `make` step can take several minutes.
-
-After installation you need to add `/tools/verilator/$VERILATOR_VERSION/bin` to your `PATH` environment variable.
-Also add it to your `~/.bashrc` or equivalent so that it's on the `PATH` in the future, like this:
-```console
-export PATH=/tools/verilator/$VERILATOR_VERSION/bin:$PATH
+./configure --prefix="${HOME}/.local"
+make
+make install
 ```
 
-Check your installation by running:
+Ensure that `${HOME}/.local/bin/` is in your `$PATH`, then check the installation:
+
 ```console
 $ verilator --version
 Verilator 4.210 2021-07-07 rev v4.210 (mod)
@@ -44,7 +39,8 @@ Verilator 4.210 2021-07-07 rev v4.210 (mod)
 
 #### Troubleshooting
 
-If you need to install to a different location than `/tools/verilator/...`, you can pass a different directory to `./configure --prefix` above and add `your/install/location/bin` to `PATH` instead.
+To install Verilator to another location, change the `--prefix` path in the script above.
+Ensure the install destination is in your `$PATH`.
 
 ## Use Bazel to run software on a verilator simulation
 
@@ -246,3 +242,5 @@ gtkwave /tmp/sim.fst
 
 Without an argument to `--trace`, the waveform file would be named `sim.fst` and be placed in the test's [runfiles](https://bazel.build/reference/test-encyclopedia#runfiles) tree.
 It would appear alongside the simulator's other outputs in the test's working directory.
+
+[Verilator]: https://www.veripool.org/verilator/
