@@ -30,6 +30,105 @@ Some hardware masking features are disabled for Earl Grey on the CW310.
 [CW340]: https://rtfm.newae.com/Targets/CW340%20Luna%20Board/
 [CW340-OTKIT]: https://www.mouser.com/access/?pn=343-NAE-CW340-OTKIT
 
+## Provisioning FPGA boards
+
+This section will show the configurations needed for running OpenTitan tests on FPGA boards.
+
+Please note that many tests require the [HyperDebug][] board.
+See [this separate guide][HyperDebug] for provisioning a HyperDebug board.
+
+[HyperDebug]: ./setup_hyperdebug.md
+
+### CW310
+
+The full CW310 setup that we use in our CI for testing requires the following components:
+
+1. CW310 FPGA board.
+2. HyperDebug Nucleo board.
+3. Custom CW310 / HyperDebug adapter "swizzle" board.
+4. Olimex ARM-USB-TINY-H JTAG adapter (others may work fine).
+5. PMOD Break-out-Board (BoB) with I2C and SPI peripherals.
+
+   * This is used by some `i2c_host` and `spi_host` tests.
+   * It will not be covered by this document as the parts it uses are not public.
+
+The full configuration (without the BoB) looks like this:
+
+![CW310 setup](./img/cw310_cables.jpg)
+
+#### CW310 USB connections
+
+The CW310 has four USB connections:
+
+* Olimex JTAG adapter.
+* OpenTitan USB device.
+* HyperDebug.
+* SAM3X chip on the CW310 board itself.
+
+In our CI, these four connections are grouped into one USB hub so we can associate them.
+
+#### CW310 / HyperDebug connection
+
+The CW310 and HyperDebug boards are connected via the [user expansion headers][] on the CW310 side and a custom "swizzle" board on the HyperDebug side.
+
+The cables we use to connect these in CI are:
+
+1. One [FFSD-17-D-05.00-01-N](https://www.digikey.co.uk/en/products/detail/samtec-inc/FFSD-17-D-05-00-01-N/6678107) cable (17 x 2 pins, 5 inches).
+2. One [FFSD-20-D-04.00-01-N](https://www.digikey.co.uk/en/products/detail/samtec-inc/FFSD-20-D-04-00-01-N/6561560) cable (20 x 2 pins, 4 inches).
+
+[user expansion headers]: https://rtfm.newae.com/Targets/CW310%20Bergen%20Board/#user-expansion-headers-a-b
+
+#### CW310 board configuration
+
+We use the following configuration of the CW310 (refer to below image):
+
+1. Power switch: enabled.
+2. Input to 5V regulator: barrel.
+3. Power source: 5V regulator.
+4. Extension voltage: 3.3V.
+5. User SPI flash: install a 1.8V 8-WSON (8x6) NOR flash chip.
+
+   * We're currently using Winbond `W25Q01NW` parts in CI.
+
+![CW310 configuration](./img/cw310_configuration.png)
+
+### CW340
+
+The full CW340 setup has three components:
+
+1. CW340 board (red).
+2. CW341 board (green).
+3. HyperDebug.
+
+The CW340 has an FTDI debugger built-in as well as a socket to connect a HyperDebug board.
+
+The OpenTitan USB device and HyperDebug USB connection can be connected back into the CW340's two downstream USB ports.
+These are then exposed through an on-board USB hub via the main CW340 USB connector.
+
+#### CW340 board configuration
+
+The following configuration is used in our CI:
+
+1. The HyperDebug board is installed in the socket.
+
+   * **Important**: ensure JP4 is set to 1.8V on the HyperDebug board before installing.
+
+2. Jumpers JP1, JP2, JP3, JP4, JP11, and JP12 are all configured for HyperDebug (HD).
+3. The JTAG selector cable (J13) is connected to HyperDebug (J12).
+4. The SPI selector cable (J23) is connected to HyperDebug (J25).
+5. A 1.8V 8-WSON (8x6) NOR flash chip is installed in the user SPI socket.
+
+   * We're currently using Winbond `W25Q256JWEIQ` parts in CI.
+
+6. Jumper JP6 is *set* to enable the user SPI flash socket.
+7. Switches IOB0 to IOB12 are all set on the underside of the board.
+
+   * Ensure the "HD DISABLE" switch remains _off_.
+
+![CW340 configuration (above)](./img/cw340_configuration_top.png)
+
+![CW340 configuration (below)](./img/cw340_configuration_bottom.jpg)
+
 ## Obtain an FPGA bitstream
 
 To instantiate OpenTitan on an FPGA you will need a bitstream. You can either download an existing bitstream for one of the supported ChipWhisperer boards or you can build it yourself.
