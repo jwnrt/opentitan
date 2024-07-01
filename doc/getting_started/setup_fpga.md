@@ -5,17 +5,30 @@ _Before following this guide, make sure you've followed the [dependency installa
 Do you want to try out OpenTitan, but don't have a couple thousand or million dollars ready for an ASIC tapeout?
 Running OpenTitan on an FPGA board can be the answer!
 
-## Prerequisites
+## Obtaining an FPGA board
 
-To use the OpenTitan on an FPGA you need two things:
+OpenTitan currently supports three FPGA boards:
 
-* A supported FPGA board
-* A tool from the FPGA vendor
+* [NewAE CW305 Artix FPGA][CW305].
+* [NewAE CW310 Bergen Board][CW310] with the Xilinx K410T FPGA (K160T not supported).
 
-Depending on the design/target combination that you want to synthesize you will need different tools and boards.
-Refer to the design documentation for information on what exactly is needed.
+  * Available on [Mouser][CW310 Mouser] or the [NewAE web store][CW310 NewAE store].
+  * This board is available in either the "normal" or "SCA" configuration.
 
-* [Obtain an FPGA board](../contributing/fpga/get_a_board.md)
+* [NewAE CW340 Luna Board][CW340] with CW341 Kintex UltraScale KU095 FPGA board attached.
+
+  * Available on Mouser as the [CW340-OTKIT][].
+
+The CW305 board supports only the English Breakfast top.
+Earl Grey and Darjeeling are both supported on the CW310 and CW340 boards.
+Some hardware masking features are disabled for Earl Grey on the CW310.
+
+[CW305]: https://rtfm.newae.com/Targets/CW305%20Artix%20FPGA/
+[CW310]: https://rtfm.newae.com/Targets/CW310%20Bergen%20Board/
+[CW310 Mouser]: https://www.mouser.com/access/?pn=343-NACW310K410TNORM
+[CW310 NewAE store]: https://store.newae.com/cw310-bergen-board-large-fpga-k410t-for-full-emulation/
+[CW340]: https://rtfm.newae.com/Targets/CW340%20Luna%20Board/
+[CW340-OTKIT]: https://www.mouser.com/access/?pn=343-NAE-CW340-OTKIT
 
 ## Obtain an FPGA bitstream
 

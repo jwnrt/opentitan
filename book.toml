@@ -32,6 +32,9 @@ additional-css = [
 [output.html.print]
 enable = false
 
+[output.html.redirect]
+"/doc/contributing/fpga/get_a_board.md" = "../../getting_started/setup_fpga.md"
+
 [preprocessor.readme2index]
 command = "./util/mdbook_readme2index.py"
 
