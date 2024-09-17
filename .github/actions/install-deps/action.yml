@@ -1,0 +1,78 @@
+# Copyright lowRISC contributors (OpenTitan project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Install dependencies
+description: Install system dependencies needed for OpenTitan
+
+inputs:
+  verilator-version:
+    description: Verilator version to install
+    required: true
+    default: '4.210'
+  verilator-path:
+    description: Path at which to install Veriltator
+    required: true
+    default: /tmp/verilator
+  verible-version:
+    description: Verible version to install
+    required: true
+    default: 'v0.0-3622-g07b310a3'
+  verible-path:
+    description: Path at which to install Verible
+    required: true
+    default: /tmp/verible
+
+runs:
+  using: composite
+  steps:
+    - name: Install system dependencies
+      run: grep '^[^#]' apt-requirements.txt | xargs sudo apt install -y
+      shell: bash
+
+    - uses: actions/setup-python@v5
+      with: # TODO: use `python-version-file` when we have `pyproject.toml`.
+        python-version: 3.9
+        cache-dependency-path: python-requirements.txt
+        cache: pip
+
+    - name: Install Python dependencies
+      run: python3 -m pip install -r python-requirements.txt --require-hashes
+      shell: bash
+
+    - name: Enable caching for EDA tools
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ inputs.verilator-path }}
+          ${{ inputs.verible-path }}
+        key: ${{ runner.os }}-${{ inputs.verilator-version }}-${{ inputs.verible-version }}
+      id: cache-eda
+
+    - name: Install Verilator
+      if: ${{ steps.cache-eda.outputs.cache-hit != 'true' }}
+      run: |
+        VERILATOR_TAR="verilator-v${{ inputs.verilator-version }}.tar.gz"
+        VERILATOR_URL="https://storage.googleapis.com/verilator-builds/${VERILATOR_TAR}"
+        curl -f -Ls -o "/tmp/${VERILATOR_TAR}" "$VERILATOR_URL" || {
+          echo "failed to download Verilator from ${VERILATOR_URL}" >&2
+          exit 1
+        }
+        mkdir -m 777 -p "${{ inputs.verilator-path }}"
+        tar -C "${{ inputs.verilator-path }}" -xvzf "/tmp/${VERILATOR_TAR}" --strip-components=1
+        echo "${{ inputs.verilator-path }}/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: Install Verible
+      if: ${{ steps.cache-eda.outputs.cache-hit != 'true' }}
+      run: |
+        VERIBLE_TAR="verible-${{ inputs.verible-version }}-linux-static-x86_64.tar.gz"
+        VERIBLE_URL="https://github.com/chipsalliance/verible/releases/download/${{ inputs.verible-version }}/${VERIBLE_TAR}"
+        curl -f -Ls -o "/tmp/${VERIBLE_TAR}" "$VERIBLE_URL" || {
+          echo "failed to download Verible from ${VERIBLE_URL}" >&2
+          exit 1
+        }
+        mkdir -m 777 -p "${{ inputs.verible-path }}"
+        tar -C "${{ inputs.verible-path }}" -xvzf "/tmp/${VERIBLE_TAR}" --strip-components=1
+        echo "${{ inputs.verible-path }}/bin" >> "$GITHUB_PATH"
+      shell: bash
