@@ -26,8 +26,18 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Enable caching for APT packages
+      uses: actions/cache@v4
+      with:
+        path: /tmp/apt-archives
+      key: ${{ runner.os }}-${{ hashFiles('apt-requirements.txt') }}
+      id: cache-apt
+    
     - name: Install system dependencies
-      run: grep '^[^#]' apt-requirements.txt | xargs sudo apt install -y
+      run: |
+        mkdir /tmp/apt-archives
+        grep '^[^#]' apt-requirements.txt | \
+          xargs sudo apt -o Dir::Cache::archives=/tmp/apt-archives install -y
       shell: bash
 
     - uses: actions/setup-python@v5
