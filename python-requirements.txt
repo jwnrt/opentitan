@@ -18,6 +18,11 @@ pyyaml==6.0
 tabulate==0.8.10
 typer==0.6.1
 
+urllib3==1.26.14
+attrs==20.3.0
+pygments==2.13.0
+soupsieve==2.1
+
 # Dependencies: gen-flash-img.py
 pyfinite==1.9.1
 
