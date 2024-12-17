@@ -5,7 +5,11 @@
 load("//rules:repo.bzl", "http_archive_or_local")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-def sphincsplus_repos(local = None):
+sphincsplus = module_extension(
+    implementation = lambda _: _sphincsplus_repos(),
+)
+
+def _sphincsplus_repos(local = None):
     http_archive(
         name = "sphincsplus_shake256_kat",
         build_file = Label("@lowrisc_opentitan//third_party/sphincsplus:BUILD.sphincsplus_common.bazel"),
