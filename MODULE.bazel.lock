@@ -749,7 +749,7 @@
     },
     "//third_party/sphincsplus:extensions.bzl%sphincsplus": {
       "general": {
-        "bzlTransitiveDigest": "h/tberaO2qCsg+GOtmjDhcUHhSgIcFX4QTasIEgYpvo=",
+        "bzlTransitiveDigest": "Z7ptIVLLUJW+lhFNJKkEFUyrbtNH2rHF03Z4QzuY0BI=",
         "usagesDigest": "Y9tt/cfxmAJXymZT4mCTnie92rzU5SphegIf6F+8AaM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
