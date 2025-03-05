@@ -11,3 +11,4 @@ typedef struct screen_context {
 
 void screen_init(screen_context_t *screen_ctx);
 void screen_draw_logo(screen_context_t *screen_ctx);
+void screen_keep_alive(screen_context_t *screen_ctx);
