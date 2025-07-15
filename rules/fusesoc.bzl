@@ -32,9 +32,6 @@ def _fusesoc_build_impl(ctx):
     outputs = []
     groups = {}
 
-    # Vivado expects `HOME` environment variable to exist. Redirect it to a fake directory.
-    home_dir = "{}/homeless-shelter".format(out_dir)
-
     # TODO(#27346): Use of `/tmp` here isn't hermetic.
     cache_dir = "/tmp/fusesoc-cache"
     cfg_file_path = "build.{}.fusesoc_config.toml".format(ctx.label.name)
@@ -82,6 +79,22 @@ def _fusesoc_build_impl(ctx):
     args.add_all(ctx.attr.systems)
     args.add_all(flags)
 
+    env = {}
+    tools = []
+    if ctx.attr.target == "synth":
+        env = dicts.add(ENV, {
+            # Vivado expects `HOME` environment variable to exist. Redirect it to a fake directory.
+            "HOME": "{}/homeless-shelter".format(out_dir),
+            # Obtain the non-hermetic binary path and append Bazel's default PATH.
+            "PATH": BIN_PATHS["vivado"] + ":/bin:/usr/bin:/usr/local/bin",
+        })
+    elif ctx.attr.target == "sim":
+        tools += [ctx.executable._verilator, ctx.executable._python3]
+        env = {
+            "PATH": ":".join([exe.dirname for exe in tools]),
+        }
+        print(env)
+
     ctx.actions.run(
         mnemonic = "FuseSoC",
         outputs = outputs,
@@ -89,17 +102,10 @@ def _fusesoc_build_impl(ctx):
             cfg_file,
         ],
         arguments = [args],
+        tools = tools,
         executable = ctx.executable._fusesoc,
         use_default_shell_env = False,
-        env = dicts.add(
-            # Verilator build doesn't need nonhermetic environment variables
-            ENV if ctx.attr.target == "synth" else {},
-            {
-                "HOME": home_dir,
-                # Obtain the non-hermetic binary path and append Bazel's default PATH.
-                "PATH": BIN_PATHS["vivado" if ctx.attr.target == "synth" else "verilator"] + ":/bin:/usr/bin:/usr/local/bin",
-            },
-        ),
+        env = env,
     )
     return [
         DefaultInfo(
@@ -133,6 +139,18 @@ fusesoc_build = rule(
         "make_options": attr.label(),
         "_fusesoc": attr.label(
             default = "//util:fusesoc_build",
+            executable = True,
+            cfg = "exec",
+        ),
+        "_verilator": attr.label(
+            allow_files = True,
+            default = "@verilator//:bin/verilator",
+            executable = True,
+            cfg = "exec",
+        ),
+        "_python3": attr.label(
+            allow_files = True,
+            default = "@python3//:python3",
             executable = True,
             cfg = "exec",
         ),
