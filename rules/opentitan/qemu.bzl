@@ -23,6 +23,12 @@ load("//rules/opentitan:toolchain.bzl", "LOCALTOOLS_TOOLCHAIN")
 _TEST_SCRIPT = """#!/bin/bash
 set -e
 
+cleanup() {{
+    rm -f {mutable_otp} {mutable_flash}
+    rm -f qemu-monitor
+}}
+trap cleanup EXIT
+
 # QEMU requires mutable flash and OTP files but Bazel only provides RO
 # files so we have to create copies unique to this test run.
 cp {otp} {mutable_otp} && chmod +w {mutable_otp}
@@ -30,15 +36,19 @@ if [ ! -z {flash} ]; then
     cp {flash} {mutable_flash} && chmod +w {mutable_flash}
 fi
 
-echo Invoking test: {test_harness} {args} "$@"
-{test_harness} {args} "$@"
+echo "Starting QEMU: {qemu} {qemu_args}"
+{qemu} {qemu_args}
+
+TEST_CMD=({test_cmd})
+echo Invoking test: {test_harness} {args} "$@" "${{TEST_CMD[@]}}"
+{test_harness} {args} "$@" "${{TEST_CMD[@]}}"
 """
 
 def qemu_params(
         tags = [],
         timeout = "short",
         local = True,
-        test_harness = "//rules/scripts:qemu_pass",
+        test_harness = "//sw/host/opentitantool",
         binaries = {},
         rom = None,
         rom_ext = None,
@@ -223,6 +233,7 @@ def _sim_qemu(ctx):
         provider = SimQemuBinaryInfo,
         test_dispatch = _test_dispatch,
         transform = _transform,
+        qemu = ctx.executable.qemu,
         cfggen = ctx.attr.cfggen,
         otptool = ctx.attr.otptool,
         flashgen = ctx.attr.flashgen,
@@ -235,6 +246,12 @@ def _sim_qemu(ctx):
 sim_qemu = rule(
     implementation = _sim_qemu,
     attrs = exec_env_common_attrs() | {
+        "qemu": attr.label(
+            executable = True,
+            cfg = "exec",
+            allow_files = True,
+            default = Label("//third_party/qemu:qemu-system-riscv32"),
+        ),
         "cfggen": attr.label(
             executable = True,
             cfg = "exec",
@@ -330,13 +347,17 @@ def _test_dispatch(ctx, exec_env, firmware):
 
     test_harness, data_labels, data_files, param, action_param = common_test_setup(ctx, exec_env, firmware)
 
-    data_files += [firmware.qemu_cfg, firmware.otp]
+    data_files += [firmware.qemu_cfg, firmware.otp, exec_env.qemu]
     test_script_fmt = {}
 
     # Get the pre-test_cmd args.
     args = get_fallback(ctx, "attr.args", exec_env)
     args = " ".join(args).format(**param)
     args = ctx.expand_location(args, data_labels)
+
+    test_cmd = get_fallback(ctx, "attr.test_cmd", exec_env)
+    test_cmd = test_cmd.format(**param)
+    test_cmd = ctx.expand_location(test_cmd, data_labels)
 
     # Add arguments to pass directly to QEMU.
     qemu_args = []
@@ -366,15 +387,27 @@ def _test_dispatch(ctx, exec_env, firmware):
             "mutable_flash": "",
         }
 
-    # Forward UART0 to stdout.
-    qemu_args += ["-chardev", "stdio,id=serial0"]
-    qemu_args += ["-serial", "chardev:serial0"]
+    # Connect the monitor to a PTY for test harnesses / OpenTitanTool to speak to:
+    qemu_args += ["-chardev", "pty,id=monitor,path=qemu-monitor"]
+    qemu_args += ["-mon", "chardev=monitor,mode=control"]
+
+    # Tell OpenTitanTool (or other test harness) where to find the QEMU monitor:
+    args += " --qemu-monitor-tty qemu-monitor"
+
+    # Create a chardev for the console UART:
+    qemu_args += ["-chardev", "null,id=console"]
+    qemu_args += ["-serial", "chardev:console"]
 
     # Scale the Ibex clock by an `icount` factor.
     qemu_args += ["-icount", "shift={}".format(param["icount"])]
 
     # Do not QEMU on resets by default.
     qemu_args += ["-global", "ot-rstmgr.fatal_reset=0"]
+
+    # Spawn QEMU stopped and in the background so we can run OpenTitanTool.
+    # The emulation will start when OpenTitanTool releases the reset pin and `cont`
+    # is sent over the monitor.
+    qemu_args += ["-daemonize", "-S"]
 
     # Add parameter-specified globals.
     if param["globals"]:
@@ -385,7 +418,7 @@ def _test_dispatch(ctx, exec_env, firmware):
     if param["qemu_args"]:
         qemu_args += json.decode(param["qemu_args"])
 
-    args += " " + " ".join(qemu_args)
+    qemu_args = " ".join(qemu_args)
 
     # Construct the test script
     script = ctx.actions.declare_file(ctx.attr.name + ".bash")
@@ -393,8 +426,11 @@ def _test_dispatch(ctx, exec_env, firmware):
     ctx.actions.write(
         script,
         _TEST_SCRIPT.format(
+            qemu = exec_env.qemu.short_path,
+            qemu_args = qemu_args,
             test_harness = test_harness.executable.short_path,
             args = args,
+            test_cmd = test_cmd,
             **test_script_fmt
         ),
     )

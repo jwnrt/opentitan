@@ -145,6 +145,21 @@ sim_qemu(
     otp = "//hw/ip/otp_ctrl/data:img_rma",
     rom_scramble_config = "//hw/top_earlgrey/data:autogen/top_earlgrey.gen.hjson",
     slot_spec = EARLGREY_SLOTS,
+    param = {
+        "interface": "qemu",
+        "exit_success": DEFAULT_TEST_SUCCESS_MSG,
+        "exit_failure": DEFAULT_TEST_FAILURE_MSG,
+    },
+    args = [
+        "--rcfile=",
+        "--logging=info",
+        "--interface={interface}",
+    ],
+    test_cmd = """
+        --exec="transport init"
+        --exec="console --non-interactive --exit-success='{exit_success}' --exit-failure='{exit_failure}'"
+        no-op
+    """,
 )
 
 sim_qemu(
