@@ -1,0 +1,13 @@
+name: Modprobe test
+on:
+  push:
+
+jobs:
+  test:
+    name: Modprobe
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Try to run modprobe
+        run: |
+          lsmod
+          sudo modprobe usbip_host
