@@ -193,7 +193,7 @@
     "//hw/top:extensions.bzl%top": {
       "general": {
         "bzlTransitiveDigest": "QfImIEoq43kXUBm6iiVr2DrJ6DfYpKKMmPL2Nbe5pUU=",
-        "usagesDigest": "Hom2+PRRv7O6cjv2zazn7RPJPwGSLYJiHNmywy5WtYg=",
+        "usagesDigest": "6Fs89XjLVg0XBcRbNfzutJOMr0zSGo0QNdTLe+RVDOI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -204,14 +204,17 @@
               "bazel_files": [
                 "@@//hw/top_earlgrey:defs.bzl",
                 "@@//hw/top_darjeeling:defs.bzl",
-                "@@//hw/top_englishbreakfast:defs.bzl"
+                "@@//hw/top_englishbreakfast:defs.bzl",
+                "@@//hw/top_earlgrey_1.0.0:defs.bzl"
               ],
               "top_vars": [
                 "EARLGREY",
                 "DARJEELING",
-                "ENGLISHBREAKFAST"
+                "ENGLISHBREAKFAST",
+                "EARLGREY_1_0_0"
               ],
               "top_names": [
+                "",
                 "",
                 "",
                 ""
@@ -791,6 +794,32 @@
             "",
             "lowrisc_opentitan",
             ""
+          ]
+        ]
+      }
+    },
+    "//third_party/opentitan:extensions.bzl%opentitan": {
+      "general": {
+        "bzlTransitiveDigest": "dCvOJNnmnFoHkR1KWjpum6uNA7GrZZriWhtduwbJrWA=",
+        "usagesDigest": "MrDQAL2CEHDHpR0OC96OPGe7UjRkqhwYQhxKYPK215s=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "earlgrey_1.0.0": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "url": "https://github.com/lowRISC/opentitan/archive/refs/tags/Earlgrey-PROD-M6.tar.gz",
+              "sha256": "6bcc33f89538868f2da39a49277c08ce2ea69ef8d8a328c19158aee9a367c20e",
+              "strip_prefix": "opentitan-Earlgrey-PROD-M6"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
           ]
         ]
       }

@@ -351,6 +351,9 @@ use_repo(qemu, "qemu_opentitan", "qemu_opentitan_src")
 doxygen = use_extension("//third_party/doxygen:extensions.bzl", "doxygen")
 use_repo(doxygen, "doxygen")
 
+opentitan = use_extension("//third_party/opentitan:extensions.bzl", "opentitan")
+use_repo(opentitan, "earlgrey_1.0.0")
+
 # Hooks:
 # Extension for linking in externally managed test and provisioning customizations
 # for both secure/non-secure manufacturer domains.
@@ -403,5 +406,9 @@ top_desc.register(
 top_desc.register(
     bazel_file = "//hw/top_englishbreakfast:defs.bzl",
     top_var = "ENGLISHBREAKFAST",
+)
+top_desc.register(
+    bazel_file = "//hw/top_earlgrey_1.0.0:defs.bzl",
+    top_var = "EARLGREY_1_0_0",
 )
 use_repo(top_desc, "tops_desc")
