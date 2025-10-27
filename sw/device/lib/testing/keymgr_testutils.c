@@ -4,6 +4,7 @@
 
 #include "sw/device/lib/testing/keymgr_testutils.h"
 
+#include "hw/top/dt/dt_otp_ctrl.h"
 #include "sw/device/lib/arch/boot_stage.h"
 #include "sw/device/lib/dif/dif_flash_ctrl.h"
 #include "sw/device/lib/dif/dif_keymgr.h"
@@ -87,8 +88,7 @@ status_t keymgr_testutils_flash_init(
 
 static status_t check_lock_otp_partition(void) {
   dif_otp_ctrl_t otp;
-  TRY(dif_otp_ctrl_init(
-      mmio_region_from_addr(TOP_EARLGREY_OTP_CTRL_CORE_BASE_ADDR), &otp));
+  TRY(dif_otp_ctrl_init_from_dt(kDtOtpCtrl, &otp));
 
   bool is_computed;
   TRY(dif_otp_ctrl_is_digest_computed(&otp, kDifOtpCtrlPartitionSecret2,
