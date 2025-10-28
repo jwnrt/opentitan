@@ -270,6 +270,7 @@ pub fn default_run_eeprom_transactions<T: Target + ?Sized>(
                         Transfer::Write(&[READ_STATUS]),
                         Transfer::Read(std::slice::from_mut(&mut status)),
                     ])?;
+                    // std::thread::sleep(std::time::Duration::from_millis(50));
                 }
             }
         }

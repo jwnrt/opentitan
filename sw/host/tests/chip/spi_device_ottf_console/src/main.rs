@@ -126,6 +126,7 @@ fn main() -> Result<()> {
     let opts = Opts::parse();
     opts.init.init_logging();
     let transport = opts.init.init_target()?;
+    // std::thread::sleep(std::time::Duration::from_secs(2));
     execute_test!(spi_device_console_test, &opts, &transport);
     Ok(())
 }

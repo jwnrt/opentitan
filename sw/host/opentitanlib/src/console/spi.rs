@@ -74,6 +74,7 @@ impl<'a> SpiConsoleDevice<'a> {
         let read_address = self.next_read_address.get();
         let mut header = vec![0u8; SpiConsoleDevice::SPI_FRAME_HEADER_SIZE];
         self.read_data(read_address, &mut header)?;
+        // println!("header: {header:x?}");
 
         let magic_number: u32 = u32::from_le_bytes(header[0..4].try_into().unwrap());
         let frame_number: u32 = u32::from_le_bytes(header[4..8].try_into().unwrap());
