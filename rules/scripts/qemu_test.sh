@@ -8,27 +8,32 @@
 # the rules in qemu.bzl.
 set -e
 
-qemu=__qemu__
-qemu_args=( __qemu_args__  )
-test_harness="__test_harness__"
+qemu_bin="__qemu_bin__"
+qemu_start="__qemu_start__"
+qemu_args=( __qemu_args__ )
+
+config="__config__"
+rom="__rom__"
 otp="__otp__"
 flash="__flash__"
+
+test_harness="__test_harness__"
 test_cmd=( __test_cmd__ )
 args=( __args__ )
 
 mutable_flash="flash_img.bin"
 mutable_otp="otp_img.raw"
 spiflash0="spiflash0.bin"
+qemu_log="qemu.log"
 
 test_args=( "$@" )
 qemu_test_args=()
 harness_test_args=()
-# Intercept all test args of the form --qemu-arg=X
-# and pass X to qemu directly.
-# For convenience, a variant with "--qemu-args=X Y Z" is also
-# supported when all space-separated substrings of the arguments
-# will be expanded to different QEMU arguments.
-# Everything else will be passed as-in to the test harness.
+
+# Intercept all test args of the form --qemu-arg=X and pass X to qemu directly.
+# For convenience, a variant with "--qemu-args=X Y Z" is also supported when all
+# space-separated substrings of the arguments will be expanded to different QEMU
+# arguments. Everything else will be passed as-in to the test harness.
 for this_arg in "${test_args[@]}"; do
     if [[ $this_arg == --qemu-arg=* ]]; then
         qemu_test_args+=( "${this_arg#--qemu-arg=}" )
@@ -46,35 +51,41 @@ qemu_pid=""
 
 cleanup() {
     set +e
-    echo "Stopping QEMU: $qemu_pid"
+    # echo "Stopping QEMU: $qemu_pid"
     # Ask nicely QEMU to stop and then kill it after one second.
-    ( sleep 1 ; echo "Killing QEMU"; kill -KILL "$qemu_pid" ) &
-    kill "$qemu_pid"
-    wait "$qemu_pid"
+    # ( sleep 1 ; echo "Killing QEMU"; kill -KILL "$qemu_pid" ) &
+    # kill "$qemu_pid"
+    # wait "$qemu_pid"
 
-    rm -f "${mutable_otp}" "${mutable_flash}"
-    rm -f "${spiflash0}"
-    rm -f qemu-monitor qemu.log
+    rm -f "$mutable_otp" "$mutable_flash"
+    rm -f "$spiflash0"
+    rm -f "$qemu_log"
 }
 trap cleanup EXIT
 
 # QEMU requires mutable flash and OTP files but Bazel only provides RO
 # files so we have to create copies unique to this test run.
-cp "${otp}" "${mutable_otp}" && chmod +w "${mutable_otp}"
-if [ -n "${flash}" ]; then
-    cp "${flash}" "${mutable_flash}" && chmod +w "${mutable_flash}"
+cp "$otp" "$mutable_otp" && chmod +w "$mutable_otp"
+if [ -n "$flash" ]; then
+    cp "$flash" "$mutable_flash" && chmod +w "$mutable_flash"
 fi
 
 # create backing storage for flash device on SPI Host 0/SPI Device SPI bus
-dd if=/dev/zero of="${spiflash0}" bs=1M count=32 status=none && chmod +w "${spiflash0}"
+dd if=/dev/zero "of=${spiflash0}" bs=1M count=32 status=none && chmod +w "$spiflash0"
 
 # QEMU disconnects from `stdout` when it daemonizes so we need to stream
 # the log through a pipe:
 mkfifo qemu.log && cat qemu.log &
 
-echo "Starting QEMU: ${qemu} ${qemu_test_args[*]} ${qemu_args[*]}"
-"${qemu}" "${qemu_test_args[@]}" "${qemu_args[@]}"
-qemu_pid=$!
+export QEMU_BIN="$qemu_bin"
+export QEMU_CONFIG="$config"
+export QEMU_FLASH="$mutable_flash"
+export QEMU_OTP="$mutable_otp"
+export QEMU_SPIFLASH="$spiflash0"
+export QEMU_LOG="$qemu_log"
+
+"$qemu_start" "${qemu_test_args[@]}" "${qemu_args[*]}"
+# qemu_pid=$!
 
 echo "Invoking test: ${test_harness} ${args[*]} ${harness_test_args[*]} ${test_cmd[*]}"
 "${test_harness}" "${args[@]}" "${harness_test_args[@]}" "${test_cmd[@]}"
