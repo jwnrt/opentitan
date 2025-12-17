@@ -866,7 +866,7 @@
                 order from LSB to MSB: PROD, PROD_END, DEV, and RMA. Each
                 byte should be set to an `alert_class_t` value accordingly.
                 The order of the 80 32-bit words, from LSB to MSB can be
-                found in the EARLGREY_ALERTS list in `rules/const.bzl`.
+                found in the `EARLGREY_ALERTS` list in `hw/top_earlgrey/defs.bzl`.
                 See the alert_handler documentation for more details.
                 '''
               isdigest: false
@@ -884,8 +884,8 @@
                 '''
                 Same as the `OWNER_SW_CFG_ROM_ALERT_CLASSIFICATION` field,
                 except these configuration correspond to the local alert
-                sources found in the `EARLGREY_LOC_ALERTS list in
-                `rules/const.bzl`.
+                sources found in the `EARLGREY_LOC_ALERTS` list in
+                `hw/top_earlgrey/defs.bzl`.
                 '''
               isdigest: false
               iszer: false

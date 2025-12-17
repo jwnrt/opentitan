@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-load("//rules:const.bzl", "CONST", "DARJEELING_LOC_ALERTS")
-load("//hw/top_darjeeling/data/autogen:defs.bzl", "DARJEELING_ALERTS")
+load("//rules:const.bzl", "CONST")
+load("//hw/top_darjeeling:defs.bzl", "DARJEELING_ALERTS", "DARJEELING_LOC_ALERTS")
 load(
     "//rules:otp.bzl",
     "OTP_SIGVERIFY_FAKE_KEYS",

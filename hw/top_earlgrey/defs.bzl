@@ -4,7 +4,7 @@
 #
 
 load("//rules/opentitan:hw.bzl", "opentitan_top")
-load("//hw/top_earlgrey/data/autogen:defs.bzl", "EARLGREY_IPS")
+load("//hw/top_earlgrey/data/autogen:defs.bzl", "EARLGREY_IPS", _EARLGREY_ALERTS = "EARLGREY_ALERTS")
 load("//hw/top_earlgrey/data/otp:defs.bzl", "EARLGREY_OTP_SIGVERIFY_FAKE_KEYS", "EARLGREY_STD_OTP_OVERLAYS")
 
 EARLGREY = opentitan_top(
@@ -32,3 +32,19 @@ EARLGREY_SLOTS = {
     "owner_slot_b": "0x90000",
     "rom_ext_size": "0x10000",
 }
+
+# Re-export.
+EARLGREY_ALERTS = _EARLGREY_ALERTS
+
+# Must match with hw/top_earlgrey/ip_autogen/alert_handler/data/alert_handler.hjson
+# The order of this list must match the order of the alerts in the OTP. Do not
+# use a set here.
+EARLGREY_LOC_ALERTS = [
+    "alert_pingfail",
+    "esc_pingfail",
+    "alert_integfail",
+    "esc_integfail",
+    "bus_integfail",
+    "shadow_reg_update_error",
+    "shadow_reg_storage_error",
+]
