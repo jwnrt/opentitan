@@ -121,6 +121,7 @@ opentitan_test(
         DARJEELING_TEST_ENVS,
         {
             "//hw/top_earlgrey:silicon_creator": None,
+            "//hw/top_earlgrey_1.0.0:sim_qemu_rom_with_fake_keys": None,
         },
     ),
     qemu = qemu_params(

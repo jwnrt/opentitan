@@ -4,7 +4,7 @@
 
 EARLGREY_1_0_0_IPS = []
 
-EARLGREY_ALERTS = [
+EARLGREY_1_0_0_ALERTS = [
     "uart0_fatal_fault",
     "uart1_fatal_fault",
     "uart2_fatal_fault",

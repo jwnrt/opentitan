@@ -10,8 +10,8 @@ load(
 )
 load(
     "//hw/top_earlgrey_1.0.0/data/otp:defs.bzl",
-    "EARLGREY_OTP_SIGVERIFY_FAKE_KEYS",
-    "EARLGREY_STD_OTP_OVERLAYS",
+    "EARLGREY_1_0_0_OTP_SIGVERIFY_FAKE_KEYS",
+    "EARLGREY_1_0_0_STD_OTP_OVERLAYS",
 )
 
 EARLGREY_1_0_0 = opentitan_top(
@@ -20,9 +20,9 @@ EARLGREY_1_0_0 = opentitan_top(
     top_lib = "@earlgrey_1.0.0//hw/top_earlgrey/sw/autogen:top_earlgrey",
     top_ld = "@earlgrey_1.0.0//hw/top_earlgrey_1.0.0/sw/autogen:top_earlgrey_memory",
     otp_map = "@earlgrey_1.0.0//hw/ip/otp_ctrl/data/otp:otp_ctrl_mmap.hjson",
-    std_otp_overlay = EARLGREY_STD_OTP_OVERLAYS,
-    otp_sigverify_fake_keys = EARLGREY_OTP_SIGVERIFY_FAKE_KEYS,
-    ips = EARLGREY_IPS,
+    std_otp_overlay = EARLGREY_1_0_0_STD_OTP_OVERLAYS,
+    otp_sigverify_fake_keys = EARLGREY_1_0_0_OTP_SIGVERIFY_FAKE_KEYS,
+    ips = EARLGREY_1_0_0_IPS,
     # secret_cfgs = {
     #     "testing": "@earlgrey_1.0.0//hw/top_earlgrey/data/autogen:top_earlgrey.secrets.testing.gen.hjson",
     # },

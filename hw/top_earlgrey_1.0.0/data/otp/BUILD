@@ -4,13 +4,8 @@
 
 load("@bazel_skylib//rules:common_settings.bzl", "int_flag", "string_flag")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-load(
-    "//rules:autogen.bzl",
-    "autogen_hjson_c_header",
-    "autogen_hjson_rust_header",
-)
 load("//rules:const.bzl", "CONST")
-load("//hw/top_earlgrey_1.0.0:defs.bzl", "EARLGREY_ALERTS", "EARLGREY_LOC_ALERTS")
+load("//hw/top_earlgrey_1.0.0:defs.bzl", "EARLGREY_1_0_0_ALERTS", "EARLGREY_1_0_0_LOC_ALERTS")
 load(
     "//rules:otp.bzl",
     "OTP_SIGVERIFY_FAKE_KEYS",
@@ -65,22 +60,6 @@ filegroup(
 )
 
 exports_files(["otp_ctrl_img.h.tpl"])
-
-autogen_hjson_c_header(
-    name = "otp_ctrl_c_regs",
-    srcs = [
-        "otp_ctrl.hjson",
-    ],
-    node = "core",
-)
-
-autogen_hjson_rust_header(
-    name = "otp_ctrl_rust_regs",
-    srcs = [
-        "otp_ctrl.hjson",
-    ],
-    node = "core",
-)
 
 exports_files(["otp_ctrl_mmap.hjson"])
 
@@ -196,7 +175,7 @@ otp_json(
                 # See `alert_class_t` in
                 # sw/device/silicon_creator/lib/drivers/alert.h
                 "OWNER_SW_CFG_ROM_ALERT_CLASSIFICATION": otp_alert_classification(
-                    alert_list = EARLGREY_ALERTS,
+                    alert_list = EARLGREY_1_0_0_ALERTS,
                     # The ordering is "prod, prod_end, dev, rma"
                     default = "X, X, X, X",
                 ),
@@ -204,7 +183,7 @@ otp_json(
                 # Set the classifications to kAlertClassX. See `alert_class_t` in
                 # sw/device/silicon_creator/lib/drivers/alert.h
                 "OWNER_SW_CFG_ROM_LOCAL_ALERT_CLASSIFICATION": otp_alert_classification(
-                    alert_list = EARLGREY_LOC_ALERTS,
+                    alert_list = EARLGREY_1_0_0_LOC_ALERTS,
                     # The ordering is "prod, prod_end, dev, rma"
                     default = "X, X, X, X",
                 ),
@@ -614,5 +593,11 @@ filegroup(
 pkg_files(
     name = "package",
     srcs = [":otp_imgs"],
-    prefix = "earlgrey_1.0.0/otp",
+    prefix = "earlgrey/otp",
+)
+
+# Partition used to set a fixed seed value in `otp_image_consts` targets.
+otp_json(
+    name = "otp_json_baseline",
+    seed = "85452983286950371191603618368782861611109037138182535346147818831008789508651",
 )
