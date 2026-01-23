@@ -38,6 +38,8 @@ cc_toolchain(
     name = "opentitan_toolchain",
     args = [
         ":system_includes",
+        ":arch_rv32imc_zcb_zcmp",
+        ":arch_rv32imcb_zcb_zcmp",
         ":arch_rv32imc",
         ":arch_rv32imcb",
         ":abi",
@@ -51,6 +53,7 @@ cc_toolchain(
     enabled_features = [
         "@rules_cc//cc/toolchains/args:experimental_replace_legacy_action_config_features",
         ":feat_rv32_bitmanip",
+        ":feat_rv32_zc",
         ":feat_warnings_as_errors",
         ":feat_guards",
         ":feat_use_lld",
@@ -69,6 +72,7 @@ cc_toolchain(
         ":feat_fastbuild",
         ":feat_opt",
         ":feat_rv32_bitmanip",
+        ":feat_rv32_zc",
     ],
     tool_map = ":tool_map",
 )
@@ -246,14 +250,43 @@ cc_feature(
     feature_name = "rv32_bitmanip",
 )
 
-cc_feature_constraint(
-    name = "constraint_bitmanip",
-    all_of = [":feat_rv32_bitmanip"],
+# This feature can be disabled to remove the `Zcb` and `Zcmp` extensions.
+cc_feature(
+    name = "feat_rv32_zc",
+    feature_name = "rv32_zc",
 )
 
 cc_feature_constraint(
-    name = "constraint_no_bitmanip",
+    name = "constraint_bitmanip_zc",
+    all_of = [":feat_rv32_bitmanip", ":feat_rv32_zc"],
+)
+
+
+cc_feature_constraint(
+    name = "constraint_bitmanip_no_zc",
+    all_of = [":feat_rv32_bitmanip"],
+    none_of = [":feat_rv32_zc"],
+)
+
+cc_feature_constraint(
+    name = "constraint_no_bitmanip_zc",
+    all_of = [":feat_rv32_zc"],
     none_of = [":feat_rv32_bitmanip"],
+)
+
+cc_feature_constraint(
+    name = "constraint_no_bitmanip_no_zc",
+    none_of = [":feat_rv32_bitmanip", ":feat_rv32_zc"],
+)
+
+cc_args(
+    name = "arch_rv32imcb_zcb_zcmp",
+    actions = [
+        "@rules_cc//cc/toolchains/actions:compile_actions",
+        "@rules_cc//cc/toolchains/actions:link_actions",
+    ],
+    args = ["-march=rv32imc_zcb_zcmp_zba_zbb_zbc_zbs"],
+    requires_any_of = [":constraint_bitmanip_zc"],
 )
 
 cc_args(
@@ -263,9 +296,18 @@ cc_args(
         "@rules_cc//cc/toolchains/actions:link_actions",
     ],
     args = ["-march=rv32imc_zba_zbb_zbc_zbs"],
-    requires_any_of = [":constraint_bitmanip"],
+    requires_any_of = [":constraint_bitmanip_no_zc"],
 )
 
+cc_args(
+    name = "arch_rv32imc_zcb_zcmp",
+    actions = [
+        "@rules_cc//cc/toolchains/actions:compile_actions",
+        "@rules_cc//cc/toolchains/actions:link_actions",
+    ],
+    args = ["-march=rv32imc_zcb_zcmp"],
+    requires_any_of = [":constraint_no_bitmanip_zc"],
+)
 cc_args(
     name = "arch_rv32imc",
     actions = [
@@ -273,7 +315,7 @@ cc_args(
         "@rules_cc//cc/toolchains/actions:link_actions",
     ],
     args = ["-march=rv32imc"],
-    requires_any_of = [":constraint_no_bitmanip"],
+    requires_any_of = [":constraint_no_bitmanip_no_zc"],
 )
 
 cc_args(
