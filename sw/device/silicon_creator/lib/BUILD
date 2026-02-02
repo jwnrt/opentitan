@@ -32,8 +32,10 @@ cc_library(
     hdrs = ["boot_data.h"],
     deps = [
         ":nonce_header",
-        "//sw/device/silicon_creator/lib/drivers:lifecycle",
-    ],
+    ] + opentitan_select_top(
+        {"englishbreakfast": []},
+        ["//sw/device/silicon_creator/lib/drivers:lifecycle"],
+    ),
 )
 
 dual_cc_library(

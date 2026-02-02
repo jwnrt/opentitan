@@ -170,6 +170,8 @@ typedef enum boot_slot {
   kBootSlotUnspecified = 0x55555555,
 } boot_slot_t;
 
+// NOTE: temporarily disabled due to English Breakfast not having an `lc_state`.
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 /**
  * Reads the boot data stored in the flash info partition.
  *
@@ -187,6 +189,7 @@ typedef enum boot_slot {
  */
 OT_WARN_UNUSED_RESULT
 rom_error_t boot_data_read(lifecycle_state_t lc_state, boot_data_t *boot_data);
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 /**
  * Writes the given boot data to the flash info partition.
