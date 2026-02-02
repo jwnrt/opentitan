@@ -4,7 +4,6 @@
 
 #include "sw/device/silicon_creator/lib/drivers/rnd.h"
 
-#include "hw/top/dt/entropy_src.h"
 #include "hw/top/dt/rv_core_ibex.h"
 #include "sw/device/lib/arch/boot_stage.h"
 #include "sw/device/lib/base/abs_mmio.h"
@@ -12,12 +11,22 @@
 #include "sw/device/lib/base/csr.h"
 #include "sw/device/lib/base/hardened.h"
 #include "sw/device/lib/base/macros.h"
+
+#include "hw/top/rv_core_ibex_regs.h"
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
+#include "hw/top/dt/entropy_src.h"
 #include "sw/device/silicon_creator/lib/drivers/otp.h"
 
 #include "hw/top/entropy_src_regs.h"
 #include "hw/top/otp_ctrl_regs.h"
-#include "hw/top/rv_core_ibex_regs.h"
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
+static inline uint32_t ibex_base(void) {
+  return dt_rv_core_ibex_primary_reg_block(kDtRvCoreIbex);
+}
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 enum {
   // This covers the health threshold registers which are contiguous. The alert
   // threshold register is not included here.
@@ -26,10 +35,6 @@ enum {
 
 static inline uint32_t entropy_src_base(void) {
   return dt_entropy_src_primary_reg_block(kDtEntropySrc);
-}
-
-static inline uint32_t ibex_base(void) {
-  return dt_rv_core_ibex_primary_reg_block(kDtRvCoreIbex);
 }
 
 // Check the number of health registers covered by this driver.
@@ -111,8 +116,10 @@ rom_error_t rnd_health_config_check(lifecycle_state_t lc_state) {
   HARDENED_CHECK_EQ(res, kErrorOk);
   return res;
 }
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 uint32_t rnd_uint32(void) {
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
   if (kBootStage == kBootStageOwner ||
       otp_read32(OTP_CTRL_PARAM_CREATOR_SW_CFG_RNG_EN_OFFSET) ==
           kHardenedBoolTrue) {
@@ -122,6 +129,8 @@ uint32_t rnd_uint32(void) {
              1)) {
     }
   }
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
+
   uint32_t mcycle;
   CSR_READ(CSR_REG_MCYCLE, &mcycle);
   return mcycle +

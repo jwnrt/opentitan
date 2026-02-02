@@ -639,14 +639,11 @@ dual_cc_library(
     ),
     deps = dual_inputs(
         device = [
-            ":otp",
             "//hw/top/dt",
             "//sw/device/lib/arch:boot_stage",
             "//sw/device/lib/base:csr",
             "//sw/device/lib/base:abs_mmio",
             "//sw/device/lib/base:hardened",
-            "//hw/top:entropy_src_c_regs",
-            "//hw/top:otp_ctrl_c_regs",
             "//hw/top:rv_core_ibex_c_regs",
             "//sw/device/lib/base:crc32",
         ],
@@ -656,10 +653,17 @@ dual_cc_library(
             "@googletest//:gtest",
         ],
         shared = [
-            ":lifecycle",
             "//sw/device/lib/base:macros",
             "//sw/device/silicon_creator/lib:error",
-        ],
+        ] + opentitan_select_top(
+            {"englishbreakfast": []},
+            [
+                ":lifecycle",
+                ":otp",
+                "//hw/top:entropy_src_c_regs",
+                "//hw/top:otp_ctrl_c_regs",
+            ],
+        ),
     ),
 )
 

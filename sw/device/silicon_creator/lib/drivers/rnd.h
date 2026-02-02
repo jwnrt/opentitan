@@ -6,13 +6,17 @@
 #define OPENTITAN_SW_DEVICE_SILICON_CREATOR_LIB_DRIVERS_RND_H_
 
 #include "sw/device/lib/base/macros.h"
-#include "sw/device/silicon_creator/lib/drivers/lifecycle.h"
 #include "sw/device/silicon_creator/lib/error.h"
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
+#include "sw/device/silicon_creator/lib/drivers/lifecycle.h"
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 /**
  * Compare the CRC32 of the configuration registers with the value in OTP.
  *
@@ -25,6 +29,7 @@ extern "C" {
  */
 OT_WARN_UNUSED_RESULT
 rom_error_t rnd_health_config_check(lifecycle_state_t lc_state);
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 /**
  * Returns a random word from the RISC-V Ibex core wrapper.
