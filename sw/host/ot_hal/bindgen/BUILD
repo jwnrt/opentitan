@@ -13,8 +13,6 @@ _TOPLEVEL = "earlgrey"
 _ENGLISH_BREAKFAST_DEPS = [
     "//sw/device/lib/dif:aon_timer",
     "//sw/device/lib/dif:clkmgr",
-    "//sw/device/lib/dif:lc_ctrl",
-    "//sw/device/lib/dif:otp_ctrl",
     "//sw/device/lib/dif:rstmgr",
     "//sw/device/lib/dif:sram_ctrl",
     "//sw/device/lib/dif:uart",
