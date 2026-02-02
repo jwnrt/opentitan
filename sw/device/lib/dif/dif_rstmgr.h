@@ -93,18 +93,6 @@ typedef enum dif_rstmgr_reset_info {
    * Device has reset due to watchdog bite.
    */
   kDifRstmgrResetInfoWatchdog = (1 << 4),
-#elif defined(OPENTITAN_IS_DARJEELING)
-  /**
-   * Device has reset due to watchdog bite.
-   */
-  kDifRstmgrResetInfoWatchdog = (1 << 3),
-  /**
-   * Device has reset due to an external reset request via soc_proxy.
-   */
-  kDifRstmgrResetInfoExternalRst = (1 << 4),
-#else
-#error "dif_rstmgr does not support this top"
-#endif
   /**
    * Device has reset due to power unstable.
    */
@@ -117,6 +105,31 @@ typedef enum dif_rstmgr_reset_info {
    * Device has reset due to non-debug-module request.
    */
   kDifRstmgrResetInfoNdm = (1 << 7),
+#elif defined(OPENTITAN_IS_DARJEELING)
+  /**
+   * Device has reset due to watchdog bite.
+   */
+  kDifRstmgrResetInfoWatchdog = (1 << 3),
+  /**
+   * Device has reset due to an external reset request via soc_proxy.
+   */
+  kDifRstmgrResetInfoExternalRst = (1 << 4),
+  /**
+   * Device has reset due to power unstable.
+   */
+  kDifRstmgrResetInfoPowerUnstable = (1 << 5),
+  /**
+   * Device has reset due to alert escalation.
+   */
+  kDifRstmgrResetInfoEscalation = (1 << 6),
+  /**
+   * Device has reset due to non-debug-module request.
+   */
+  kDifRstmgrResetInfoNdm = (1 << 7),
+#elif defined(OPENTITAN_IS_ENGLISHBREAKFAST)
+#else
+#error "dif_rstmgr does not support this top"
+#endif
 } dif_rstmgr_reset_info_t;
 
 /**
