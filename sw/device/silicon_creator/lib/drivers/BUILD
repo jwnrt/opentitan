@@ -22,6 +22,7 @@ load(
     "silicon_params",
     "verilator_params",
 )
+load("//hw/top:defs.bzl", "opentitan_select_top")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -168,9 +169,10 @@ dual_cc_library(
     ),
     visibility = ["//visibility:public"],
     deps = dual_inputs(
-        device = [
-            "//hw/top:otp_ctrl_c_regs",
-        ],
+        device = opentitan_select_top(
+            {"englishbreakfast": []},
+            ["//hw/top:otp_ctrl_c_regs"],
+        ),
         host = [
             "//sw/device/lib/base:global_mock",
             "//sw/device/silicon_creator/testing:rom_test",
@@ -186,8 +188,10 @@ dual_cc_library(
             "//sw/device/lib/base:multibits",
             "//sw/device/silicon_creator/lib:error",
             "//sw/device/silicon_creator/lib/base:sec_mmio",
-            "//sw/device/silicon_creator/lib/drivers:otp",
-        ],
+        ] + opentitan_select_top(
+            {"englishbreakfast": []},
+            ["//sw/device/silicon_creator/lib/drivers:otp"],
+        ),
     ),
 )
 

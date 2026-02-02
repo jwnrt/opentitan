@@ -553,12 +553,14 @@ void flash_ctrl_data_default_cfg_set(flash_ctrl_cfg_t cfg);
  */
 flash_ctrl_cfg_t flash_ctrl_data_default_cfg_get(void);
 
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 /**
  * Reads the boot data info page configuration settings from OTP.
  *
  * @return Current OTP configuration settings.
  */
 flash_ctrl_cfg_t flash_ctrl_boot_data_cfg_get(void);
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 /**
  * A type for flash_ctrl memory protection region indices.

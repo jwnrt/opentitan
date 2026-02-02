@@ -14,11 +14,15 @@
 #include "sw/device/lib/base/memory.h"
 #include "sw/device/lib/base/multibits.h"
 #include "sw/device/silicon_creator/lib/base/sec_mmio.h"
-#include "sw/device/silicon_creator/lib/drivers/otp.h"
 #include "sw/device/silicon_creator/lib/error.h"
 
 #include "hw/top/flash_ctrl_regs.h"
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
+#include "sw/device/silicon_creator/lib/drivers/otp.h"
+
 #include "hw/top/otp_ctrl_regs.h"
+#endif
 
 static const dt_flash_ctrl_t kFlashCtrlDt = kDtFlashCtrl;
 
@@ -246,6 +250,7 @@ void flash_ctrl_init(void) {
       kFlashCtrlSecMmioInit,
       kFlashCtrlSecMmioDataDefaultCfgSet + 2 * kFlashCtrlSecMmioInfoCfgSet);
 
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
   // Set `HW_INFO_CFG_OVERRIDE` register if needed. This must be done before
   // initializing the flash_ctrl.
   uint32_t reg_val = FLASH_CTRL_HW_INFO_CFG_OVERRIDE_REG_RESVAL;
@@ -269,10 +274,13 @@ void flash_ctrl_init(void) {
         flash_ctrl_core_base() + FLASH_CTRL_HW_INFO_CFG_OVERRIDE_REG_OFFSET,
         reg_val);
   }
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
   // Initialize the flash controller.
   abs_mmio_write32(flash_ctrl_core_base() + FLASH_CTRL_INIT_REG_OFFSET,
                    bitfield_bit32_write(0, FLASH_CTRL_INIT_VAL_BIT, true));
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
   // Configure default scrambling, ECC, and HE settings for the data partition.
   otp_val =
       otp_read32(OTP_CTRL_PARAM_CREATOR_SW_CFG_FLASH_DATA_DEFAULT_CFG_OFFSET);
@@ -283,10 +291,12 @@ void flash_ctrl_init(void) {
       .he = bitfield_field32_read(otp_val, FLASH_CTRL_OTP_FIELD_HE),
   };
   flash_ctrl_data_default_cfg_set(data_default_cfg);
+
   // Configure scrambling, ECC, and HE for `boot_data` pages.
   flash_ctrl_cfg_t boot_data_cfg = flash_ctrl_boot_data_cfg_get();
   flash_ctrl_info_cfg_set(&kFlashCtrlInfoPageBootData0, boot_data_cfg);
   flash_ctrl_info_cfg_set(&kFlashCtrlInfoPageBootData1, boot_data_cfg);
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 }
 
 void flash_ctrl_disable(void) {
@@ -543,6 +553,7 @@ flash_ctrl_cfg_t flash_ctrl_data_default_cfg_get(void) {
   };
 }
 
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 flash_ctrl_cfg_t flash_ctrl_boot_data_cfg_get(void) {
   uint32_t otp_val =
       otp_read32(OTP_CTRL_PARAM_CREATOR_SW_CFG_FLASH_INFO_BOOT_DATA_CFG_OFFSET);
@@ -553,6 +564,7 @@ flash_ctrl_cfg_t flash_ctrl_boot_data_cfg_get(void) {
       .he = bitfield_field32_read(otp_val, FLASH_CTRL_OTP_FIELD_HE),
   };
 }
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 void flash_ctrl_data_region_protect(flash_ctrl_region_index_t region,
                                     uint32_t page_offset, uint32_t num_pages,
