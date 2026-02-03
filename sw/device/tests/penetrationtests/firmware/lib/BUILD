@@ -59,7 +59,7 @@ cc_library(
         "//sw/device/lib/ujson",
         "//sw/device/silicon_creator/lib/base:boot_measurements",
         "//sw/device/silicon_creator/lib/drivers:flash_ctrl",
-        "//sw/device/silicon_creator/lib/ownership",
+        "//sw/device/silicon_creator/lib/ownership:datatypes",
         "//sw/device/tests/penetrationtests/json:pentest_lib_commands",
     ] + opentitan_select_top(
         {"englishbreakfast": []},
