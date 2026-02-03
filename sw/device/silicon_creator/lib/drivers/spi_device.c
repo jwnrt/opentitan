@@ -8,12 +8,15 @@
 #include "sw/device/lib/base/abs_mmio.h"
 #include "sw/device/lib/base/bitfield.h"
 #include "sw/device/lib/base/memory.h"
-#include "sw/device/silicon_creator/lib/drivers/lifecycle.h"
 #include "sw/device/silicon_creator/lib/drivers/spi_device_bfpt.h"
 #include "sw/device/silicon_creator/lib/error.h"
 
 #include "hw/top/flash_ctrl_regs.h"
 #include "hw/top/spi_device_regs.h"
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
+#include "sw/device/silicon_creator/lib/drivers/lifecycle.h"
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
 
 static const dt_spi_device_t kSpiDeviceDt = kDtSpiDevice;
 
@@ -508,6 +511,8 @@ void spi_device_init(uint8_t log2_density, const void *sfdp_table,
   reg = bitfield_field32_write(reg, SPI_DEVICE_JEDEC_CC_NUM_CC_FIELD,
                                kSpiDeviceJedecContCodeCount);
   abs_mmio_write32(spi_device_reg_base() + SPI_DEVICE_JEDEC_CC_REG_OFFSET, reg);
+
+#if !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
   // Note: The code below assumes that chip revision and generation numbers
   // from the life cycle controller (16-bits each) will fit in the revision and
   // generation fields of the device ID (3 and 4 bits, respectively).
@@ -519,6 +524,7 @@ void spi_device_init(uint8_t log2_density, const void *sfdp_table,
   reg = bitfield_bit32_write(reg, SPI_DEVICE_DEV_ID_ROM_BOOTSTRAP_BIT, true);
   reg = bitfield_field32_write(reg, SPI_DEVICE_DEV_ID_CHIP_GEN_FIELD,
                                hw_rev.product_id);
+#endif  // !defined(OPENTITAN_IS_ENGLISHBREAKFAST)
   reg = bitfield_field32_write(reg, SPI_DEVICE_DEV_ID_DENSITY_FIELD,
                                log2_density);
   reg = bitfield_field32_write(reg, SPI_DEVICE_JEDEC_ID_MF_FIELD,
