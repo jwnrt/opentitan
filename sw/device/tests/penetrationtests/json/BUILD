@@ -2,6 +2,8 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+load("//hw/top:defs.bzl", "opentitan_select_top")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -178,9 +180,11 @@ cc_library(
     srcs = ["pentest_lib_commands.c"],
     hdrs = ["pentest_lib_commands.h"],
     deps = [
-        "//hw/top:alert_handler_c_regs",
         "//sw/device/lib/ujson",
-    ],
+    ] + opentitan_select_top(
+        {"englishbreakfast": []},
+        ["//hw/top:alert_handler_c_regs"],
+    ),
 )
 
 cc_library(
