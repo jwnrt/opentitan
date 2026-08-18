@@ -251,6 +251,7 @@ _SPX_TESTS = {
             "//signing/softhsm",
             "//signing/softhsm:conf",
             "//sw/device/silicon_creator/lib/ownership/keys/fake:spx_keyset",
+            "//sw/device/silicon_creator/lib/ownership/keys/fake:slh_dsa_keyset",
             "//sw/host/hsmtool",
             "//sw/host/opentitantool",
             "@softhsm2//:gen_dir",
@@ -262,7 +263,7 @@ _SPX_TESTS = {
                 --rcfile=
                 spx verify {rev_flag}
                     --domain={domain}
-                    sw/device/silicon_creator/lib/ownership/keys/fake/app_prod_spx.pem
+                    sw/device/silicon_creator/lib/ownership/keys/fake/app_prod_slh_dsa.pem
                     $(rootpath :tqbf_digest)
                     tqbf.spx_sig
             """.format(
@@ -273,8 +274,8 @@ _SPX_TESTS = {
             "HSMTOOL_SPX_MODULE": "pkcs11-ef",
             "HSMTOOL_ARGS": """
                 -t fake_keys -u user -p 123456
-                spx sign
-                    --label=fake_app_prod_spx
+                slh-dsa sign
+                    --label=fake_app_prod_slh_dsa
                     --domain={domain}
                     --format={fmt}
                     --output=tqbf.spx_sig

@@ -146,3 +146,14 @@ keyset(
     profile = "local",
     tool = "//signing/tokens:local",
 )
+
+keyset(
+    name = "slh_dsa_keyset",
+    build_setting_default = "",
+    keys = {
+        "app_prod_slh_dsa.pem": "app_prod_0",
+        "app_dev_slh_dsa.pem": "app_dev_0:domain=PreHashedSha256",
+    },
+    profile = "local",
+    tool = "//signing/tokens:local",
+)
